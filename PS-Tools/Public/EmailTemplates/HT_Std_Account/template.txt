@@ -1,0 +1,21 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72" >
+<img src="cid:keyname"></br>
+<p>#FIRSTNAME#,</p>
+
+<p>Your user name is: #DOMAIN#\#USERID#</p>
+
+<p>You will receive your password in a separate email.</p>
+
+<p>You will be unable to change your password for 24 hours from the receipt of this email.
+After that, to change your password press Ctrl+Alt+End from a Remote Desktop session and choose Change Password.</p>
+
+<p>Please contact us if you have any questions or issues.</p>
+
+<p>Regards,</br>
+IT Team</p>
+</body>

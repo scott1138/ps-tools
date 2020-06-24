@@ -1,0 +1,15 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72" >
+<img src="cid:keyname"></br>
+
+<p>Security,</p>
+
+<p>An RSA token request for #DOMAIN# has been made for #USERID#.  They are using an #PHONETYPE# device.</p>
+
+<p>Regards,</br>
+IT Team</p>
+</body>

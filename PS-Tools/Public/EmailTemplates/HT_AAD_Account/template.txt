@@ -1,0 +1,25 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72" >
+<img src="cid:keyname"></br>
+<p>#FIRSTNAME#,</p>
+
+<p>Your user name to log into the Azure AD will be: #USERID#@#DOMAIN#</p>
+
+<p>When logging into servers (if applicable), your user name is: #USERID#</p>
+
+<p>To complete your user setup:</p>
+<p>&emsp;1) Please visit <a href="https://passwordreset.microsoftonline.com/?username=#USERID#@example.com">https://passwordreset.microsoftonline.com</a> to set your password.</p>
+
+<p>&emsp;2) Once your password has been set, please visit <a href="https://account.activedirectory.windowsazure.com">https://account.activedirectory.windowsazure.com</a> to complete your account registration.</p>
+
+<p>After completing the registration you may close your browser.</p>
+
+<p>Please contact us if you have any questions or issues.</p>
+
+<p>Regards,</br>
+IT Team</p>
+</body>

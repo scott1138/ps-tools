@@ -1,0 +1,23 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72" >
+<img src="cid:keyname"></br>
+
+<p>#FIRSTNAME#,</p>
+
+<p>Click the following link to retrieve your password:</p>
+
+<p>https://onetimesecret.com/secret/#ONETIMESECRET#</p>
+
+<p>NOTE:</br>
+This link is good for 24 hours from the receipt of this email. After that time the link will say that is never existed.
+If the link dispays this message before 24 hours, reply to this message immediately to have your password reset and a new link issued.</p>
+
+<p>Please contact us if you have any questions or issues.</p>
+
+<p>Regards,</br>
+IT Team</p>
+</body>

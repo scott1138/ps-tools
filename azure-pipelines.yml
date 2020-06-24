@@ -1,0 +1,67 @@
+trigger:
+- master
+
+jobs:
+- job: test_pwsh_ws2019
+  displayName: 'Test Module with PowerShell 6 on Windows Server 2019'
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - pwsh: .\test.ps1
+    displayName: 'Run test.ps1'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results: PowerShell 6 on Windows Server 2019'
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: '**/testResults.xml'
+      mergeTestResults: true
+      failTaskOnFailedTests: false
+      testRunTitle: 'PS6_WS2019'
+
+- job: test_powershell_ws2019
+  displayName: 'Test Module with PowerShell 5.1 on Windows Server 2019'
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - powershell: .\test.ps1
+    displayName: 'Run test.ps1'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results: PowerShell 5.1 on Windows Server 2019'
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: '**/testResults.xml'
+      mergeTestResults: true
+      failTaskOnFailedTests: false
+      testRunTitle: 'PS5.1_WS2019'
+
+- job: test_pwsh_linux
+  displayName: 'Test Module with PowerShell 6 on Linux'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - powershell: .\test.ps1
+    displayName: 'Run test.ps1'
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results: PowerShell 6 on Linux'
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: '**/testResults.xml'
+      mergeTestResults: true
+      failTaskOnFailedTests: false
+      testRunTitle: 'PS6_Linux'
+
+- job: publish
+  displayName: 'Publish Module'
+  pool: 'windows-2019'
+  dependsOn :
+  - test_pwsh_ws2019
+  - test_powershell_ws2019
+  - test_pwsh_linux
+  condition: ne(variables['Build.Reason'],'PullRequest')
+  steps:
+  - checkout: self
+    persistCredentials: true
+  - powershell: .\publish.ps1
+    displayName: 'Run publish.ps1'
+    env:
+      API_KEY: $(api_key)
