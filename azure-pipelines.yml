@@ -57,7 +57,7 @@ jobs:
   - test_pwsh_ws2019
   - test_powershell_ws2019
   - test_pwsh_linux
-  condition: ne(variables['Build.Reason'],'PullRequest')
+  condition: false
   steps:
   - checkout: self
     persistCredentials: true
