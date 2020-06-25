@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: ps7-ws2019-test
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: ps7-ws2019-test
+        run: ./test.ps1
+        shell: pwsh
+
+      - name: Publish Report
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: NUnit-Tests
+          path: ./testResults.xml
+      
