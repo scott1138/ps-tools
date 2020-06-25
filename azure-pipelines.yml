@@ -22,7 +22,7 @@ jobs:
 - job: test_powershell_ws2019
   displayName: 'Test Module with PowerShell 5.1 on Windows Server 2019'
   pool:
-    vmImage: windows-latest
+    vmImage: windows-2019
   steps:
   - powershell: .\test.ps1
     displayName: 'Run test.ps1'
@@ -53,7 +53,7 @@ jobs:
 
 - job: publish
   displayName: 'Publish Module'
-  pool: windows-latest
+  pool: windows-2019
   dependsOn :
   - test_pwsh_ws2019
   - test_powershell_ws2019
