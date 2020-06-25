@@ -1,19 +1,18 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+jobs:
+  - job: test_pwsh_ws2019
+    displayName: 'Test Module with PowerShell 6 on Windows Server 2019'
+    pool:
+     name: 'Azure Pipelines'
+     vmImage: windows-latest
+    steps:
+      - pwsh: .\test.ps1
+        displayName: 'Run Tests'
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'NUnit'
+    testResultsFiles: '**/testResults.xml'
+    mergeTestResults: true
+    testRunTitle: 'PS7_WS2019'
