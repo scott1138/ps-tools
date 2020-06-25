@@ -10,9 +10,9 @@ jobs:
     steps:
       - pwsh: .\test.ps1
         displayName: 'Run Tests'
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'NUnit'
-    testResultsFiles: '**/testResults.xml'
-    mergeTestResults: true
-    testRunTitle: 'PS7_WS2019'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/testResults.xml'
+          mergeTestResults: true
+          testRunTitle: 'PS7_WS2019'
