@@ -28,4 +28,4 @@ if (-not (Get-PSRepository -Name 'PS-Tools' -ErrorAction SilentlyContinue)) {
     Register-PSRepository -Name 'PS-Tools' -SourceLocation 'tbd' -PublishLocation 'tbd' -InstallationPolicy Trusted -Verbose
 }
 
-Publish-Module -Repository 'PS-Tools' -NuGetApiKey $env:API_KEY -Path .\PS-Tools -Verbose
+#Publish-Module -Repository 'PS-Tools' -NuGetApiKey $env:API_KEY -Path .\PS-Tools -Verbose
