@@ -49,7 +49,9 @@ function Get-CertificateExpiration {
     }
 
     # If TestRun switch is supplied, choose 20 random records
-    $Hosts = $Hosts | Get-Random -Count 5
+    if ($TestRun) {
+        $Hosts = $Hosts | Get-Random -Count 20
+    }
 
     # Thread safe variable to hold errors
     if ($LogErrors) {
