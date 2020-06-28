@@ -1,23 +1,24 @@
 [CmdletBinding()]
 
 param (
-    [switch] $Local,
-    [switch] $ForceBuild
+    [ValidateSet('None','Normal','Detailed','Diagnostic')]
+    [String]
+    $Output = 'Normal',
+
+    [switch]
+    $Local,
+
+    [switch]
+    $ForceBuild
 )
 
 $ErrorActionPreference = 'Stop'
 
-Import-Module .\PS-Tools\PS-Tools.psd1 -Force
+# 4>$null elimates the requires errors for testing
+Import-Module .\PS-Tools\PS-Tools.psd1 -Force -DisableNameChecking 4>$null
 
 if (-not [boolean](Get-Module -Name Pester)) {
     Install-Module -Name Pester -Force -SkipPublisherCheck | Out-Null
-}
-
-$BasePesterParams = @{
-    PassThru     = $true
-    PesterOption = @{
-        IncludeVSCodeMarker = $true
-    }
 }
 
 $PipelinePesterParams = @{
@@ -38,21 +39,27 @@ $LinuxPesterParams = @{
 }
 
 if ($PSEdition -eq 'Core' -and $IsLinux) {
-    $PesterParams = $BasePesterParams + $LinuxPesterParams
+    $PesterParams = $LinuxPesterParams
 }
 elseif ($PSEdition -eq 'Core' -and $IsWindows) {
-    $PesterParams = $BasePesterParams + $PS6PesterParams
+    $PesterParams = $PS6PesterParams
 }
 else {
-    $PesterParams = $BasePesterParams + $PS5PesterParams
+    $PesterParams = $PS5PesterParams
 }
 
 if (-not $Local) {
     $PesterParams = $PesterParams + $PipelinePesterParams
 }
 
-Write-Host "OS is Windows: $IsWindows"
-Write-Host "OS is Linux  : $IsLinux"
+$PesterParams.Add('Output',$Output)
+$PesterParams.Add('Passthru',$true)
+
+Write-Host "OS is Windows : $IsWindows"
+Write-Host "OS is Linux   : $IsLinux"
+Write-Host ""
+Write-Host "PowerShell Version : $($PSVersionTable.PSVersion)"
+Write-Host "PowerShell Edition : $($PSVersionTable.PSEdition)"
 
 Write-Host "`nPester Parameters:"
 Write-Output $PesterParams
