@@ -82,7 +82,7 @@ function Copy-SnapshotToVHD {
         if (-not (Get-AzStorageContainer -Context $Context -Container $ContainerName -ErrorAction SilentlyContinue)) {
             try {
                 Write-Verbose $ContainerName
-                New-AzStorageContainer -Context $Context -Container $ContainerName | Out-Null
+                New-AzStorageContainer -Context $Context -Name $ContainerName | Out-Null
                 Write-Verbose "Cointainer $ContainerName created successfully."
             }
             catch {
