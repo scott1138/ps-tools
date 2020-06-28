@@ -21,34 +21,25 @@ if (-not [boolean](Get-Module -Name Pester)) {
     Install-Module -Name Pester -Force -SkipPublisherCheck | Out-Null
 }
 
-$PS6PesterParams = @{
-    ExcludeTag = 'PS5Only'
-}
-
-$PS5PesterParams = @{
-    ExcludeTag = 'PS6Only'
-}
-
-$LinuxPesterParams = @{
-    ExcludeTag = @('PS5Only','WindowsOnly')
-}
-
-if ($PSEdition -eq 'Core' -and $IsLinux) {
-    $PesterParams = $LinuxPesterParams
-}
-elseif ($PSEdition -eq 'Core' -and $IsWindows) {
-    $PesterParams = $PS6PesterParams
+if (-not $Local) {
+    $Config = [PesterConfiguration]::Default.TestResult
 }
 else {
-    $PesterParams = $PS5PesterParams
+    $Config = [PesterConfiguration]::Default
 }
 
-if (-not $Local) {
-    $PesterParams.Add('CI',$true)
-}
+$Config.Output.Verbosity = $Output
+$config.Run.PassThru = $true
 
-$PesterParams.Add('Output',$Output)
-$PesterParams.Add('Passthru',$true)
+if ($PSEdition -eq 'Core' -and $IsLinux) {
+    $Config.Filter.ExcludeTag = @('PS5Only','WindowsOnly')
+}
+elseif ($PSEdition -eq 'Core' -and $IsWindows) {
+    $Config.Filter.ExcludeTag = @('PS5Only')
+}
+else {
+    $Config.Filter.ExcludeTag = @('PS6Only')
+}
 
 Write-Host "OS is Windows : $IsWindows"
 Write-Host "OS is Linux   : $IsLinux"
@@ -62,7 +53,7 @@ Write-Output $PesterParams
 # For Code Coverage
 #$Functions = (Get-ChildItem -Path .\PS-Tools\ -Recurse -Include *.ps1 -Exclude *.tests.ps1,images.ps1).FullName
 
-$TestResults = Invoke-Pester @pesterParams #-CodeCoverage $Functions
+$TestResults = Invoke-Pester -Configuration $Config
 
 if ($TestResults.FailedCount -gt 0) {
     # Throw "Unit tests failed."
