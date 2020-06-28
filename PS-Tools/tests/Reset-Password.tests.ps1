@@ -1,26 +1,28 @@
 # Remove module and import the local version we want test
 # This assumes the PSD1 file is two folders above this test file
-Remove-Module PS-Tools -Force -ErrorAction SilentlyContinue
-Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -Force
+Remove-Module PS-Tools -Force -ErrorAction SilentlyContinue -Verbose:$false
+Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -Force -DisableNameChecking 4>$null
 
 Describe 'Reset-Password Tests' {
 
-    # Define commands in case the module is not installed.
-    Function Get-ADUser {}
-    Function Set-ADAccountPassword {}
+    BeforeAll {
+        # Define commands in case the module is not installed.
+        Function Get-ADUser {}
+        Function Set-ADAccountPassword {}
 
-    Mock New-Password {'P@ssw0rd!!'} -ModuleName PS-Tools
+        Mock New-Password {'P@ssw0rd!!'} -ModuleName PS-Tools
 
-    Mock Get-ADUser {$true} -ModuleName PS-Tools
+        Mock Get-ADUser {$true} -ModuleName PS-Tools
 
-    Mock Set-ADAccountPassword {$true} -ModuleName PS-Tools
+        Mock Set-ADAccountPassword {$true} -ModuleName PS-Tools
 
-    Mock New-OneTimeSecret {
-        return 'ASecretKey'
-    } -ModuleName PS-Tools
+        Mock New-OneTimeSecret {
+            return 'ASecretKey'
+        } -ModuleName PS-Tools
 
-    Mock Send-Email {$true} -ModuleName PS-Tools
-
+        Mock Send-Email {$true} -ModuleName PS-Tools
+    }
+    
     Context 'Password is generated' {
 
         It 'Call New-Password' {
@@ -151,7 +153,7 @@ Describe 'Reset-Password Tests' {
                 $ErrorCaught = $true
             }
             
-            $ErrorCaught | Should Be $true
+            $ErrorCaught | Should -Be $true
 
         }
 

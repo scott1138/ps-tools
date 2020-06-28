@@ -1,7 +1,7 @@
 # Remove module and import the local version we want test
 # This assumes the PSD1 file is two folders above this test file
-Remove-Module PS-Tools -Force -ErrorAction SilentlyContinue
-Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -Force
+Remove-Module PS-Tools -Force -ErrorAction SilentlyContinue -Verbose:$false
+Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -DisableNameChecking 4>$null
 
 Describe 'New-Password Tests' {
     It 'Generates the default password pattern and length' {
