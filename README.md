@@ -2,6 +2,11 @@
 
 PS-Tools is a collection of tools to simplify the administrative processes.
 
+## Build Status
+[![Build Status](https://dev.azure.com/scott-1138/scott1138/_apis/build/status/scott1138.ps-tools?branchName=master)](https://dev.azure.com/scott-1138/scott1138/_build/latest?definitionId=3&branchName=master)
+
+** The Pester tests are having issues but the 'Fail if there are test failures' is set to false ** 
+
 ## NOTE: DOCUMENTATION IS CURRENTLY INCOMPLETE
 
 ## Table of Contents
