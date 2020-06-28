@@ -30,10 +30,9 @@ if (-not $Local) {
 }
 else {
     $Config = [PesterConfiguration]::Default
+    $Config.Output.Verbosity = $Output
+    $config.Run.PassThru = $true
 }
-
-$Config.Output.Verbosity = $Output
-$config.Run.PassThru = $true
 
 if ($PSEdition -eq 'Core' -and $IsLinux) {
     $Config.Filter.ExcludeTag = @('PS5Only','WindowsOnly')
