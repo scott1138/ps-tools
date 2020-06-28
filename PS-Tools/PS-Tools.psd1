@@ -75,7 +75,7 @@ FunctionsToExport = @(
     'Handle-Error',
     'Refresh-Module',
     'New-AADServicePrincipal',
-    'New-ADUser',
+    'New-User',
     'New-UserCsv',
     'New-OneTimeSecret',
     'New-Password',

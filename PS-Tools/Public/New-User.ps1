@@ -1,4 +1,4 @@
-function New-ADUser {
+function New-User {
 
   [CmdletBinding(
     DefaultParameterSetName = 'NoRSA',
@@ -316,8 +316,9 @@ function New-ADUser {
       Handle-Error -e [System.Exception]::new('New-ADUser failed due to data input issues.')
     }
 
+    # Need to fix
     # Login to Azure AD
-    New-AADServicePrincipal -AADTenant $Domain
+    # Login-AzureAD -AADTenant $Domain
 
     foreach ($User in $Users) {
 
@@ -374,6 +375,7 @@ function New-ADUser {
       }
       catch {
         Write-Host -Message "Unable to create user $($User.FirstName) $($User.LastName)" -ForegroundColor Red
+        Write-Host -Message $_.Exception.Message -ForegroundColor Yellow
         $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value $_.Exception.Message
         $FailedUsers += $User
         # Stop processing for this user
