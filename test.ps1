@@ -23,7 +23,7 @@ if (-not [boolean](Get-Module -Name Pester)) {
 
 $Pester = Import-Module Pester -Force -PassThru
 
-Write-Host "Pester Version: $($Pester.Version)"
+Write-InformationPlus "Pester Version: $($Pester.Version)`n"
 
 $Config = [PesterConfiguration]::Default
 $Config.Output.Verbosity = $Output
@@ -43,13 +43,12 @@ else {
     $Config.Filter.ExcludeTag = @('PS6Only')
 }
 
-Write-Host "OS is Windows : $IsWindows"
-Write-Host "OS is Linux   : $IsLinux"
-Write-Host ""
-Write-Host "PowerShell Version : $($PSVersionTable.PSVersion)"
-Write-Host "PowerShell Edition : $($PSVersionTable.PSEdition)"
+Write-InformationPlus "OS is Windows : $IsWindows"
+Write-InformationPlus "OS is Linux   : $IsLinux`n"
+Write-InformationPlus "PowerShell Version : $($PSVersionTable.PSVersion)"
+Write-InformationPlus "PowerShell Edition : $($PSVersionTable.PSEdition)"
 
-Write-Host "`nPester Parameters:"
+Write-InformationPlus "`nPester Parameters:"
 Write-Output $PesterParams
 
 # For Code Coverage
@@ -68,6 +67,6 @@ if ($LASTEXITCODE -eq 0) {
     throw "Tag $Version already exists"
 }
 else {
-    Write-Host "Commit will be tagged $Version"
+    Write-InformationPlus "Commit will be tagged $Version"
     exit 0
 }

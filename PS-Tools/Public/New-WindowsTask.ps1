@@ -439,7 +439,7 @@ function New-WindowsTask
     # https://docs.microsoft.com/en-us/windows/win32/taskschd/taskfolder-registertaskdefinition
     if ($OutputXML)
     {
-        Write-Host $TaskDefinition.XmlText
+        Write-InformationPlus $TaskDefinition.XmlText
     }
     else
     {

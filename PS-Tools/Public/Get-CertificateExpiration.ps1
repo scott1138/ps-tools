@@ -161,6 +161,6 @@ function Get-CertificateExpiration {
         $LogPath = "$env:TEMP\cert_exp_error_log.csv"
         $Errors | Select-Object HostName, Message, ErrorCode, Source |
             Export-CSV -NoTypeInformation -Path $LogPath
-        Write-Host "Errors exported to $LogPath"
+        Write-InformationPlus "Errors exported to $LogPath"
     }
 }

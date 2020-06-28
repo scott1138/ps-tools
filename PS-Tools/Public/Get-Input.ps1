@@ -32,8 +32,8 @@ function Get-Input {
         # This makes sure we don't get accidentally blank reponses
         # or invalidate responses because of accidental spacebar press
         if ($MultipleChoice) {
-            Write-Host 'The following question allows for multiple responses.'
-            Write-Host 'Please separate those responses with a comma.'
+            Write-InformationPlus 'The following question allows for multiple responses.'
+            Write-InformationPlus 'Please separate those responses with a comma.'
         }
         $Input = (Read-Host -Prompt "$Prompt [$Default]").Trim()
         
@@ -49,16 +49,16 @@ function Get-Input {
                     return $Input
                 }
                 else {
-                    Write-Host "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
-                    Write-Host "Valid Choices: $($ValidResponses -join ',')`n" -ForeGroundColor Yellow    
+                    Write-InformationPlus "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
+                    Write-InformationPlus "Valid Choices: $($ValidResponses -join ',')`n" -ForeGroundColor Yellow    
                 }
             }
             elseif ($Input -in $ValidResponses) {
                 return $Input
             }
             else {
-                Write-Host "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
-                Write-Host "Valid Responses: $($ValidResponses -join ',')`n" -ForeGroundColor Yellow
+                Write-InformationPlus "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
+                Write-InformationPlus "Valid Responses: $($ValidResponses -join ',')`n" -ForeGroundColor Yellow
             }
         }
         elseif (-not [string]::IsNullOrEmpty($Match)) {
@@ -66,16 +66,16 @@ function Get-Input {
                 return $Input
             }
             else {
-                Write-Host "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
-                Write-Host "Valid input should match the pattern: $Match`n" -ForeGroundColor Yellow
+                Write-InformationPlus "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
+                Write-InformationPlus "Valid input should match the pattern: $Match`n" -ForeGroundColor Yellow
                 if (-not [string]::IsNullOrEmpty($MatchHint)) {
-                    Write-Host "$MatchHint`n" -ForeGroundColor Yellow
+                    Write-InformationPlus "$MatchHint`n" -ForeGroundColor Yellow
                 }
             }
         }
         elseif ($Required) {
             if ([string]::IsNullOrEmpty($Input)) {
-                Write-Host "`nThis field requires a value, please enter the required data.`n" -ForeGroundColor Yellow
+                Write-InformationPlus "`nThis field requires a value, please enter the required data.`n" -ForeGroundColor Yellow
             }
             else {
                 return $Input

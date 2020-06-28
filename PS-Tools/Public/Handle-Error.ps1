@@ -15,9 +15,9 @@ function Handle-Error {
     $FQErrorID     = $e.FullyQualifiedErrorId
 
     if (-not [string]::IsNullorEmpty($Message)) {
-        Write-Host $Message -ForegroundColor Yellow
+        Write-InformationPlus $Message -ForegroundColor Yellow
     }
-    Write-Host $Exception -ForegroundColor Yellow
+    Write-InformationPlus $Exception -ForegroundColor Yellow
     Write-Verbose "Error Details: $ErrorPosition"
     Write-Verbose "Fully Qualified Error: $FQErrorID"
     Write-Verbose "ScriptStackTrace: $StackTrace"

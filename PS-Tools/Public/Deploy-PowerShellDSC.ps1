@@ -28,24 +28,24 @@ function Deploy-PowerShellDSC {
         $Job = Get-Job -Name "${Server}_$CurrentPhase"
         if ($Job.State -eq 'Failed') {
             $Output = Receive-Job -Job $Job
-            Write-Host "$Server - DSC $CurrentPhase Failed!"
-            Write-Host $Output
+            Write-InformationPlus "$Server - DSC $CurrentPhase Failed!"
+            Write-InformationPlus $Output
             $Phase[$Server] = 'Failed'
             return $false
         }
         elseif ($Job.State -eq 'Running') {
-            Write-Host "$Server - $CurrentPhase is still running..."
+            Write-InformationPlus "$Server - $CurrentPhase is still running..."
             return $false
         }
         elseif ($Job.State -eq 'Completed') {
             $Output = Receive-Job -Job $Job -AutoRemoveJob -Wait
-            Write-Host "$Server - DSC $CurrentPhase completed!"
-            #Write-Host $Output
+            Write-InformationPlus "$Server - DSC $CurrentPhase completed!"
+            #Write-InformationPlus $Output
             $Phase[$Server] = $NextPhase
             return $true
         }
         else {
-            Write-Host "$Server - Unexpected state: $($Job.State)"
+            Write-InformationPlus "$Server - Unexpected state: $($Job.State)"
             $Phase[$Server] = 'Failed'
             return $false
         }
@@ -71,7 +71,7 @@ function Deploy-PowerShellDSC {
 
     # DNS CHECK - DNS records are required for this process to work.
     # Servers will self register, so wait for DNS records before continuing
-    Write-Host "Checking for DNS records..."
+    Write-InformationPlus "Checking for DNS records..."
     $PendingDNS = $true
     while ($PendingDNS) {
         $ServersPendingDNS = @()
@@ -81,11 +81,11 @@ function Deploy-PowerShellDSC {
             }
         }
         if ($ServersPendingDNS.Count -eq 0) {
-            Write-Host "All DNS records found!"
+            Write-InformationPlus "All DNS records found!"
             $PendingDNS = $false
         }
         else {
-            Write-Host "Waiting for the following DNS records to create\propagate:`n$($ServersPendingDNS -join "`n")"
+            Write-InformationPlus "Waiting for the following DNS records to create\propagate:`n$($ServersPendingDNS -join "`n")"
             Start-Sleep -Seconds 30
         }
     }
@@ -106,11 +106,11 @@ function Deploy-PowerShellDSC {
     # Copy files, at the moment this process is serial, but the files are small to it runs quickly.
     foreach ($Server in $Servers) {
         try {
-            Write-Host "$Server - Copying DSC files..."
+            Write-InformationPlus "$Server - Copying DSC files..."
             $Session = Get-PSSession -Name $Server
             $Result = Invoke-Command -Session $Session -ScriptBlock { if (-not (Test-Path -Path C:\Configuration)) { New-Item -ItemType Directory -Path c:\Configuration } }
             $Result = Copy-Item -Path "$ConfigPath\*" -Destination 'C:\Configuration\' -Recurse -Force -ToSession $Session
-            Write-Host "$Server - DSC files copied!"
+            Write-InformationPlus "$Server - DSC files copied!"
             if ($AdditionalFiles) {
                 foreach ($AdditionalFile in $AdditionalFiles) {
                     if (Test-Path $AdditionalFile -PathType Container) {
@@ -147,14 +147,14 @@ function Deploy-PowerShellDSC {
 
     do {
         # Commenting until some future time when I work out the issues
-        # Write-Host "Remaining Servers: $($ActiveServers -join ',')"
+        # Write-InformationPlus "Remaining Servers: $($ActiveServers -join ',')"
         foreach ($Server in $ActiveServers) {
             # Get PSSesssion for this server
             $Session = Get-PSSession -Name $Server
 
             # If not started, call DSC setup
             if ($Phase[$Server] -eq 'Unstarted') {
-                Write-Host "$Server - Starting DSC Setup..."
+                Write-InformationPlus "$Server - Starting DSC Setup..."
                 $Cmd = Invoke-Command -Session $Session -ScriptBlock { C:\Configuration\dsc_setup.ps1 4>&1 } -JobName "${Server}_Setup"
                 $Phase[$Server] = 'Setup'
                 # Test
@@ -163,7 +163,7 @@ function Deploy-PowerShellDSC {
             # If phase is Setup, check to see if setup is finished, then create DSC Config
             if ($Phase[$Server] -eq 'Setup') {
                 if (Check-JobState -Session $Session -Server $Server -CurrentPhase 'Setup' -NextPhase 'Config') {
-                    Write-Host "$Server - Starting DSC Config..."
+                    Write-InformationPlus "$Server - Starting DSC Config..."
                     $Cmd = Invoke-Command -Session $Session -ScriptBlock { Invoke-Expression "C:\Configuration\dsc_config.ps1 4>&1" } -JobName "${Server}_Config"
                 }
                 
@@ -171,7 +171,7 @@ function Deploy-PowerShellDSC {
             # If phase is Config, check to see if config is finished, then apply DSC Config
             if ($Phase[$Server] -eq 'Config') {
                 if (Check-JobState -Session $Session -Server $Server -CurrentPhase 'Config' -NextPhase 'Apply') {
-                    Write-Host "$Server - Starting DSC Apply..."
+                    Write-InformationPlus "$Server - Starting DSC Apply..."
                     $Cmd = Invoke-Command -Session $Session -ScriptBlock { Invoke-Expression "C:\Configuration\dsc_apply.ps1 4>&1" } -JobName "${Server}_Apply"
                 }
             }
@@ -181,42 +181,42 @@ function Deploy-PowerShellDSC {
             }
             # Check the server to see if DSC has completed applying, then move to Restart phase
             if ($Phase[$Server] -eq 'DSC_Check') {
-                Write-Host "$Server - Checking DSC Configuration..."
+                Write-InformationPlus "$Server - Checking DSC Configuration..."
                 # Remove any existing CIM sessions for this server
                 Get-CimSession -ComputerName $Server -ErrorAction SilentlyContinue | Remove-CimSession -ErrorAction SilentlyContinue
                 $CimSession = New-CimSession -ComputerName $Server -ErrorAction SilentlyContinue
                 if ($CimSession) {
                     $DSCStatus = Get-DSCConfigurationStatus -CimSession $CimSession
                     if ($DSCStatus.Status -eq 'Success') {
-                        Write-Host "$Server - DSC Configuration Succeeded!"
-                        Write-Host "$Server - $($DSCStatus.NumberOfResources) resources configured."
+                        Write-InformationPlus "$Server - DSC Configuration Succeeded!"
+                        Write-InformationPlus "$Server - $($DSCStatus.NumberOfResources) resources configured."
                         $Phase[$Server] = 'Restart'
                     }
                     elseif ($DSCStatus.Status -eq 'Failed') {
-                        Write-Host "$Server - DSC Configuration Failed!"
-                        Write-Host "$Server - $($DSCStatus.ResourcesInDesiredState.Count) resources succeeded."
-                        Write-Host "$Server - $($DSCStatus.ResourcesNotInDesiredState.Count) resources failed."
+                        Write-InformationPlus "$Server - DSC Configuration Failed!"
+                        Write-InformationPlus "$Server - $($DSCStatus.ResourcesInDesiredState.Count) resources succeeded."
+                        Write-InformationPlus "$Server - $($DSCStatus.ResourcesNotInDesiredState.Count) resources failed."
                         $Phase[$Server] = 'Failed'
                     }
                     else {
-                        Write-Host "$Server - DSC Configuration still applying..."
+                        Write-InformationPlus "$Server - DSC Configuration still applying..."
                     }
                 }
                 # Assume that if the CIMSession is null that DSC is still applying
                 else {
-                    Write-Host "$Server - DSC Configuration still applying..."
+                    Write-InformationPlus "$Server - DSC Configuration still applying..."
                 }
             }
             # Restart server, then wait a few seconds before moving on to check for uptime.
             if ($Phase[$Server] -eq 'Restart') {
-                Write-Host "$Server - Restarting..."
+                Write-InformationPlus "$Server - Restarting..."
                 $Result = Restart-Computer -ComputerName $Server -Force
                 Start-Sleep 5
                 $Phase[$Server] = 'Restarting'
             }
             if ($Phase[$Server] -eq 'Restarting') {
                 if (Test-WSMan -ComputerName $Server -ErrorAction SilentlyContinue) {
-                    Write-Host "$Server - Is back up!"
+                    Write-InformationPlus "$Server - Is back up!"
                     $Phase[$Server] = 'Finished'
                 }
             }
@@ -237,7 +237,7 @@ function Deploy-PowerShellDSC {
         $Phase.GetEnumerator() | ForEach-Object {
             if ($_.Name -in $ActiveServers -and $_.Value -in @('Finished','Failed'))
             {
-                Write-Host "$($_.Name) - Status is $($_.Value), removing from Servers array."
+                Write-InformationPlus "$($_.Name) - Status is $($_.Value), removing from Servers array."
                 $ActiveServers.Remove($Server)
             }
         }
@@ -245,7 +245,7 @@ function Deploy-PowerShellDSC {
 
         # Wait 10 seconds to give processess time to complete
         if (-not $Completed) {
-            Write-Host "Waiting 10 seconds before the next update."
+            Write-InformationPlus "Waiting 10 seconds before the next update."
             Start-Sleep -Seconds 10
         }
 

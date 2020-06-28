@@ -18,16 +18,16 @@ function New-UserCsv {
 
     Do {
         $OptionSelected = $false
-        Write-Host "Select an option:"
-        Write-Host "  1. Create a CSV file with headers but no data."
-        Write-Host "  2. Enter user data."
-        Write-Host "  E. Exit"
+        Write-InformationPlus "Select an option:"
+        Write-InformationPlus "  1. Create a CSV file with headers but no data."
+        Write-InformationPlus "  2. Enter user data."
+        Write-InformationPlus "  E. Exit"
         $Option = Read-Host  "----------------------------`n"
         switch ($Option) {
             '1' {$OptionSelected = $true}
             '2' {$OptionSelected = $true}
-            'e' {Write-Host "User exited function.`n" -ForeGroundColor Yellow;return}
-            default {Write-Host "`n$Option is an invalid selection!`nPlease choose an option from the menu.`n" -ForeGroundColor Yellow}
+            'e' {Write-InformationPlus "User exited function.`n" -ForeGroundColor Yellow;return}
+            default {Write-InformationPlus "`n$Option is an invalid selection!`nPlease choose an option from the menu.`n" -ForeGroundColor Yellow}
         }
     }
     Until ($OptionSelected)
@@ -37,7 +37,7 @@ function New-UserCsv {
     if ($Option -eq '1') {
         'FirstName,LastName,Description,EmailAddress,MobileNumber,ADGroups,AADGroups,RSA,PhoneType' | Out-File -FilePath $Path
         $FullPath = (Get-Item $Path).FullName
-        Write-Host "User CSV template created: $FullPath`n"
+        Write-InformationPlus "User CSV template created: $FullPath`n"
         return
     }
 
@@ -53,7 +53,7 @@ function New-UserCsv {
 
     Do {
         Clear-Host
-        Write-Host "User $($Users.Count + 1)`n"
+        Write-InformationPlus "User $($Users.Count + 1)`n"
         $CopyUserSuccess = $false
         $BaseADGroups = $null
         Do {
@@ -66,7 +66,7 @@ function New-UserCsv {
                         $CopyUserSuccess = $true
                     }
                     catch {
-                        Write-Host "AD User $BaseUserName was not found, please try again."
+                        Write-InformationPlus "AD User $BaseUserName was not found, please try again."
                     }
                 }
                 else {
@@ -74,10 +74,10 @@ function New-UserCsv {
                 }
             }
             else {
-                Write-Host "Unable to copy a user, Active Directory module is not present.`n"
+                Write-InformationPlus "Unable to copy a user, Active Directory module is not present.`n"
                 break
             }
-            Write-Host "`n"
+            Write-InformationPlus "`n"
         } Until ($CopyUserSuccess)
 
         $FirstName    = Get-Input -Prompt 'First Name (no special characters)' -Required
@@ -119,9 +119,9 @@ function New-UserCsv {
     Do {
         Clear-Host
         $Users | Format-Table @{Name='Index';Expression={$Users.IndexOf($_)}},FirstName,LastName,Description,EmailAddress,MobileNumber,ADGroups,AADGroups,RSA,PhoneType -Wrap -AutoSize
-        Write-Host "`n"
+        Write-InformationPlus "`n"
         #$Response = Get-Input -Prompt 'Choose an entry to edit or press C to continue' -ValidResponses @(0..($users.count-1),'c') -Default 'C'
-        Write-Host "Press any key to write the data to $Path"
+        Write-InformationPlus "Press any key to write the data to $Path"
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
         $DataConfirmed = $true
     } Until ($DataConfirmed)
