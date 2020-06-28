@@ -16,10 +16,9 @@ function Deploy-PowerShellDSC {
     )
 
 
-    function Check-JobState {
+    function Get-JobState {
         param
         (
-            [object]$Session,
             [string]$Server,
             [string]$CurrentPhase,
             [string]$NextPhase
@@ -108,16 +107,16 @@ function Deploy-PowerShellDSC {
         try {
             Write-InformationPlus "$Server - Copying DSC files..."
             $Session = Get-PSSession -Name $Server
-            $Result = Invoke-Command -Session $Session -ScriptBlock { if (-not (Test-Path -Path C:\Configuration)) { New-Item -ItemType Directory -Path c:\Configuration } }
-            $Result = Copy-Item -Path "$ConfigPath\*" -Destination 'C:\Configuration\' -Recurse -Force -ToSession $Session
+            Invoke-Command -Session $Session -ScriptBlock { if (-not (Test-Path -Path C:\Configuration)) { New-Item -ItemType Directory -Path c:\Configuration } } | Out-Null
+            Copy-Item -Path "$ConfigPath\*" -Destination 'C:\Configuration\' -Recurse -Force -ToSession $Session | Out-Null
             Write-InformationPlus "$Server - DSC files copied!"
             if ($AdditionalFiles) {
                 foreach ($AdditionalFile in $AdditionalFiles) {
                     if (Test-Path $AdditionalFile -PathType Container) {
-                        $Result = Copy-Item -Path "$AdditionalFile\*" -Destination 'C:\Configuration\' -Recurse -Force -ToSession $Session
+                        Copy-Item -Path "$AdditionalFile\*" -Destination 'C:\Configuration\' -Recurse -Force -ToSession $Session | Out-Null
                     }
                     elseif (Test-Path $AdditionalFile -PathType Leaf) {
-                        $Result = Copy-Item -Path "$AdditionalFile" -Destination 'C:\Configuration\' -Force -ToSession $Session
+                        Copy-Item -Path "$AdditionalFile" -Destination 'C:\Configuration\' -Force -ToSession $Session | Out-Null
                     }
                 }
             }
@@ -155,29 +154,29 @@ function Deploy-PowerShellDSC {
             # If not started, call DSC setup
             if ($Phase[$Server] -eq 'Unstarted') {
                 Write-InformationPlus "$Server - Starting DSC Setup..."
-                $Cmd = Invoke-Command -Session $Session -ScriptBlock { C:\Configuration\dsc_setup.ps1 4>&1 } -JobName "${Server}_Setup"
+                Invoke-Command -Session $Session -ScriptBlock {PowerShell.exe -ExecutionPolicy Unrestricted -Command 'C:\Configuration\dsc_setup.ps1 4>&1'} -JobName "${Server}_Setup" | Out-Null
                 $Phase[$Server] = 'Setup'
                 # Test
                 #Start-Sleep -Seconds 2
             }
             # If phase is Setup, check to see if setup is finished, then create DSC Config
             if ($Phase[$Server] -eq 'Setup') {
-                if (Check-JobState -Session $Session -Server $Server -CurrentPhase 'Setup' -NextPhase 'Config') {
+                if (Get-JobState -Server $Server -CurrentPhase 'Setup' -NextPhase 'Config') {
                     Write-InformationPlus "$Server - Starting DSC Config..."
-                    $Cmd = Invoke-Command -Session $Session -ScriptBlock { Invoke-Expression "C:\Configuration\dsc_config.ps1 4>&1" } -JobName "${Server}_Config"
+                    Invoke-Command -Session $Session -ScriptBlock {PowerShell.exe -ExecutionPolicy Unrestricted -Command 'C:\Configuration\dsc_config.ps1 4>&1'} -JobName "${Server}_Config" | Out-Null
                 }
                 
             }
             # If phase is Config, check to see if config is finished, then apply DSC Config
             if ($Phase[$Server] -eq 'Config') {
-                if (Check-JobState -Session $Session -Server $Server -CurrentPhase 'Config' -NextPhase 'Apply') {
+                if (Get-JobState -Server $Server -CurrentPhase 'Config' -NextPhase 'Apply') {
                     Write-InformationPlus "$Server - Starting DSC Apply..."
-                    $Cmd = Invoke-Command -Session $Session -ScriptBlock { Invoke-Expression "C:\Configuration\dsc_apply.ps1 4>&1" } -JobName "${Server}_Apply"
+                    Invoke-Command -Session $Session -ScriptBlock {PowerShell.exe -ExecutionPolicy Unrestricted -Command 'C:\Configuration\dsc_apply.ps1 4>&1'} -JobName "${Server}_Apply" | Out-Null
                 }
             }
             # Watch for initial DSC Apply to complete and then move to the DSC Check
             if ($Phase[$Server] -eq 'Apply') {
-                Check-JobState -Session $Session -Server $Server -CurrentPhase 'Apply' -NextPhase 'DSC_Check' | Out-Null
+                Get-JobState -Server $Server -CurrentPhase 'Apply' -NextPhase 'DSC_Check' | Out-Null
             }
             # Check the server to see if DSC has completed applying, then move to Restart phase
             if ($Phase[$Server] -eq 'DSC_Check') {
@@ -210,7 +209,7 @@ function Deploy-PowerShellDSC {
             # Restart server, then wait a few seconds before moving on to check for uptime.
             if ($Phase[$Server] -eq 'Restart') {
                 Write-InformationPlus "$Server - Restarting..."
-                $Result = Restart-Computer -ComputerName $Server -Force
+                Restart-Computer -ComputerName $Server -Force | Out-Null
                 Start-Sleep 5
                 $Phase[$Server] = 'Restarting'
             }
@@ -227,7 +226,7 @@ function Deploy-PowerShellDSC {
         $Completed = $true
         $Phase.GetEnumerator() | ForEach-Object {
             if ($_.value -notin @('Finished', 'Failed')) {
-                $Completed = $false
+                $Script:Completed = $false
             }
         }
         
