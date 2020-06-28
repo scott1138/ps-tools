@@ -67,7 +67,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             }
 
             New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
-            New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput #-InformationAction Ignore
+            New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             Remove-Item -Path $UserCsvPath -Force
 
             $TestCases = @{

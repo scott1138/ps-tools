@@ -42,7 +42,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
         It 'Generates the desired output when using password auth.' {
             
-            $Result = New-AADServicePrincipal -Name 'SP-Mock-AADApp' -AADTenant 'AADTenant'
+            $Result = New-AADServicePrincipal -Name 'SP-Mock-AADApp' -AADTenant 'AADTenant' -InformationAction SilentlyContinue
 
             $Result.ClientID | Should -BeOfType [GUID]
             $Result.Password.Length | Should -be 44
@@ -51,7 +51,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
         It 'Generates the desired output when using certificate auth.' -Tag 'PS5Only' {
 
-            $Result = New-AADServicePrincipal -Name SP-Mock-AADApp -CertAuth -AADTenant AADTenant
+            $Result = New-AADServicePrincipal -Name SP-Mock-AADApp -CertAuth -AADTenant AADTenant -InformationAction SilentlyContinue
 
             $Result.ClientID | Should -BeOfType [GUID]
             $Result.CertThumbprint.Length | Should -Be 40
