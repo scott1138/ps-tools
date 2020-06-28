@@ -42,7 +42,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
         It 'Generates the desired output when using password auth.' {
             
-            $Result = New-AADServicePrincipal -Name SP-Mock-AADApp -AADTenant AADTenant
+            $Result = New-AADServicePrincipal -Name 'SP-Mock-AADApp' -AADTenant 'AADTenant'
 
             $Result.ClientID | Should -BeOfType [GUID]
             $Result.Password.Length | Should -be 44

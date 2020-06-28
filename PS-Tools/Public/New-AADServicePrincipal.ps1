@@ -20,7 +20,7 @@ function New-AADServicePrincipal {
 
     # Connect to Azure and select subscription
     Write-Host "`nConnecting to Azure..." -NoNewLine
-    New-AADServicePrincipal -AADTenant $AADTenant
+    Login-AzureAD -AADTenant $AADTenant
     Write-Host "Done!" -ForegroundColor Green
 
     # Install compatibility module for core
