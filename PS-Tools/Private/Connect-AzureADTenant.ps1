@@ -1,4 +1,4 @@
-function Login-AzureAD {
+function Connect-AzureADTenant {
 
   [CmdletBinding()]
 

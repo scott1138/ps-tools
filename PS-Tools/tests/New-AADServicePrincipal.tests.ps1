@@ -34,7 +34,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
             Mock New-AzADServicePrincipal { $true } -ModuleName PS-Tools
 
-            Mock Login-AzureAD { $true } -ModuleName PS-Tools
+            Mock Connect-AzureADTenant { $true } -ModuleName PS-Tools
 
             Mock Read-Host { ConvertTo-SecureString -String 'Password' -AsPlainText -Force } -ModuleName PS-Tools
 

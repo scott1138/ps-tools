@@ -7,8 +7,8 @@ BeforeAll {
     $UserCsvPath = "$env:TEMP\user.csv"
 
     # Mock avoids actual attempts to login
-    Function Login-AzureAD {}
-    Mock Login-AzureAD { $true }
+    Function Connect-AzureADTenant {}
+    Mock Connect-AzureADTenant { $true }
 
     # Mock needs to return $true because the result is used as a condition
     Function New-ADUser {}
@@ -77,7 +77,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
 
         It 'User is created' -TestCases $TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
-            #Should -Invoke Login-AzureAD -Exactly 1 -Scope Context
+            #Should -Invoke Connect-AzureADTenant -Exactly 1 -Scope Context
             #Should -Invoke New-User -Exactly 1 -Scope Context
         }
 

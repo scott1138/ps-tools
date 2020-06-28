@@ -318,7 +318,7 @@ function New-User {
 
         # Need to fix
         # Login to Azure AD
-        # Login-AzureAD -AADTenant $Domain
+        # Connect-AzureADTenant -AADTenant $Domain
 
         foreach ($User in $Users) {
 

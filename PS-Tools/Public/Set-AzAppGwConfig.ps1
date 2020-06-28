@@ -115,7 +115,7 @@ function Set-AzAppGWConfig {
 
         # Connect to Azure and select subscription
         Write-InformationPlus "`nConnecting to Azure..." -NoNewLine
-        Login-AzureAD -AADTenant $AADTenant
+        Connect-AzureADTenant -AADTenant $AADTenant
         Write-InformationPlus "Done!" -ForegroundColor Green
         
         # Set Subscription
