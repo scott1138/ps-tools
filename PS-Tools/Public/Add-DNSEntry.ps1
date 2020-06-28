@@ -63,7 +63,7 @@ Function Add-DNSEntry {
     }
   }
   catch {
-    Handle-Error $_
+    Format-Error $_
   }
   
   <#

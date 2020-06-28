@@ -56,7 +56,7 @@ function New-SA {
       Write-Verbose "Using domain controller $DomainController"
     }
     catch {
-      Handle-Error -e $_
+      Format-Error -e $_
     }
 
 
@@ -290,7 +290,7 @@ function New-SA {
         }
       }
       catch {
-        Handle-Error -e $_ -Message "Failed to create user $($Account.UserName), aborting process!"
+        Format-Error -e $_ -Message "Failed to create user $($Account.UserName), aborting process!"
       }
     } # End Account Creation - foreach Account
         

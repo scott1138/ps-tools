@@ -153,14 +153,14 @@ function New-User {
 
         # Check for Az Module
         if (-not (Get-Module -Name Az -ListAvailable)) {
-            #Handle-Error -e [System.Exception]::new('Required module Az not installed.')
+            #Format-Error -e [System.Exception]::new('Required module Az not installed.')
             Write-InformationPlus 'Required module Az not installed.' -ForegroundColor Yellow
             break
         }
 
         # Check for ActiveDirectory module
         if (-not (Get-Module -Name ActiveDirectory -ListAvailable)) {
-            #Handle-Error -e [System.Exception]::new('Required module Az not installed.')
+            #Format-Error -e [System.Exception]::new('Required module Az not installed.')
             Write-InformationPlus 'Required module ActiveDirectory not installed.' -ForegroundColor Yellow
             break
         }
@@ -184,7 +184,7 @@ function New-User {
                 $Users = @(Import-Csv $UserFile)
             }
             catch {
-                Handle-Error -e $_ -Message 'Unable to import the user file.'
+                Format-Error -e $_ -Message 'Unable to import the user file.'
             }
 
             # Validate the user file contains the required properties 
@@ -206,7 +206,7 @@ function New-User {
                 }
             }
             catch {
-                Handle-Error -e $_
+                Format-Error -e $_
             }
         }
         else {
@@ -313,7 +313,7 @@ function New-User {
             else {
                 $InvalidUsers | Format-Table LineNumber, Issue, FirstName, LastName, Description, EmailAddress, MobileNumber, ADGroups, AADGroups, RSA, PhoneType -Wrap -AutoSize
             }
-            Handle-Error -e [System.Exception]::new('New-ADUser failed due to data input issues.')
+            Format-Error -e [System.Exception]::new('New-ADUser failed due to data input issues.')
         }
 
         # Need to fix

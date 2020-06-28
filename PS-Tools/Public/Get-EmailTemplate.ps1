@@ -28,7 +28,7 @@ function Get-EmailTemplate {
         $Templates = Get-ChildItem -Path "$PSScriptRoot\EmailTemplates" -Exclude "Images"
     }
     catch {
-        Handle-Error -e $_
+        Format-Error -e $_
     }
 
     foreach ($Template in $Templates) {

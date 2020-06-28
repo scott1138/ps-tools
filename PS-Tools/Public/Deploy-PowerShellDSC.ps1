@@ -122,7 +122,7 @@ function Deploy-PowerShellDSC {
             }
         }
         catch {
-            Handle-Error -e $_ -Message "Unable to copy files for $Server"
+            Format-Error -e $_ -Message "Unable to copy files for $Server"
         }
     }
 

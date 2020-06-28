@@ -132,7 +132,7 @@ function New-UserCsv {
         $Users | Select-Object FirstName,LastName,Description,EmailAddress,MobileNumber,ADGroups,AADGroups,RSA,PhoneType | Export-Csv -NoTypeInformation -Path $Path
     }
     catch {
-        Handle-Error -e $_ -Message 'Failed to write user data to file.'
+        Format-Error -e $_ -Message 'Failed to write user data to file.'
     }
 
     <#

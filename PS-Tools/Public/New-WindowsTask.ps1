@@ -344,7 +344,7 @@ function New-WindowsTask
         }
         catch
         {
-            Handle-Error -e $_ -Message 'Unable to locate the requested task folder'
+            Format-Error -e $_ -Message 'Unable to locate the requested task folder'
         }
     }
     else

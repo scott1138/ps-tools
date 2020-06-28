@@ -72,7 +72,7 @@ Description = 'This module contains custom script cmdlets for common admin tasks
 # FunctionsToExport = '*'
 FunctionsToExport = @(
     'Get-Input',
-    'Handle-Error',
+    'Format-Error',
     'Refresh-Module',
     'New-AADServicePrincipal',
     'New-User',

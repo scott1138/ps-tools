@@ -40,7 +40,7 @@ function Get-CertificateExpiration {
                 Where-Object {$_.HostName -ne '@' -and $_.RecordType -in @('A','CNAME')}
         }
         catch {
-            Handle-Error -e $_ -Message 'Failed to retrieve DNS records'
+            Format-Error -e $_ -Message 'Failed to retrieve DNS records'
         }
     }
 

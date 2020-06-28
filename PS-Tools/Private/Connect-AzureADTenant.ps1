@@ -25,7 +25,7 @@ function Connect-AzureADTenant {
       Write-Verbose "Successfully logged into $AADTenant AAD."
     }
     catch {
-      Handle-Error -e $_ -Message "Unable to connect to Azure AD."
+      Format-Error -e $_ -Message "Unable to connect to Azure AD."
     }
   }
 

@@ -129,7 +129,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to get Application Gateway'
+            Format-Error -e $_ -Message 'Failed to get Application Gateway'
         }
 
         # Get IP and Port info for configuration
@@ -140,7 +140,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to get IP resource'
+            Format-Error -e $_ -Message 'Failed to get IP resource'
         }
 
         # Get HTTP Port info for configuration
@@ -157,7 +157,7 @@ function Set-AzAppGWConfig {
             }
             catch {
                 Write-InformationPlus "Error!" -ForegroundColor Red
-                Handle-Error -e $_ -Message 'Failed to get HTTP port resource'
+                Format-Error -e $_ -Message 'Failed to get HTTP port resource'
             }
         }
 
@@ -181,7 +181,7 @@ function Set-AzAppGWConfig {
             }
             catch {
                 Write-InformationPlus "Error!" -ForegroundColor Red
-                Handle-Error -e $_ -Message 'Failed to get HTTPS port resource'
+                Format-Error -e $_ -Message 'Failed to get HTTPS port resource'
             }
         
             Write-InformationPlus "`nStarting config for $URL...`n"
@@ -218,7 +218,7 @@ function Set-AzAppGWConfig {
             }
             catch {
                 Write-InformationPlus "Error!" -ForegroundColor Red
-                Handle-Error -e $_ -Message 'Failed to process the SSL certificate'
+                Format-Error -e $_ -Message 'Failed to process the SSL certificate'
             }
             try {
                 Write-InformationPlus "Processing Auth Certificate..." -NoNewLine
@@ -245,7 +245,7 @@ function Set-AzAppGWConfig {
             }
             catch {
                 Write-InformationPlus "Error!" -ForegroundColor Red
-                Handle-Error -e $_ -Message 'Failed to process the Auth certificate'
+                Format-Error -e $_ -Message 'Failed to process the Auth certificate'
             }
         }
 
@@ -293,7 +293,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to add or get custom Health Probes'
+            Format-Error -e $_ -Message 'Failed to add or get custom Health Probes'
         }
 
 
@@ -334,7 +334,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to add or get Address Pool'
+            Format-Error -e $_ -Message 'Failed to add or get Address Pool'
         }
 
         # Add new http config
@@ -373,7 +373,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to add HTTP/HTTPS Settings'
+            Format-Error -e $_ -Message 'Failed to add HTTP/HTTPS Settings'
         }
 
         # Add and get listeners
@@ -413,7 +413,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to add or get Listeners'
+            Format-Error -e $_ -Message 'Failed to add or get Listeners'
         }
 
         # Add and redirect config
@@ -436,7 +436,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to add or get Redirect Configuration'
+            Format-Error -e $_ -Message 'Failed to add or get Redirect Configuration'
         }
 
         # Add routing rules
@@ -484,7 +484,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Write-InformationPlus "Error!" -ForegroundColor Red
-            Handle-Error -e $_ -Message 'Failed to add Request Routing Rule'
+            Format-Error -e $_ -Message 'Failed to add Request Routing Rule'
         }
 
         # Check for active operations
@@ -512,7 +512,7 @@ function Set-AzAppGWConfig {
         }
         catch {
             Export-Clixml -Path "$Env:TEMP\appgw.xml" -InputObject $AppGw -Force
-            Handle-Error -e $_ -Message "Failed to commit Application Gateway changes. Check AppGw object at $Env:TEMP\appgw.xml."
+            Format-Error -e $_ -Message "Failed to commit Application Gateway changes. Check AppGw object at $Env:TEMP\appgw.xml."
         }
 
         Write-InformationPlus "Changes committed successfully!" -ForegroundColor Green
