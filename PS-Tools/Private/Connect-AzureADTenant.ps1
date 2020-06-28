@@ -21,7 +21,7 @@ function Connect-AzureADTenant {
 
   if ($Login) {
     try {
-      $Response = Connect-AzAccount
+      Connect-AzAccount | Out-Null
       Write-Verbose "Successfully logged into $AADTenant AAD."
     }
     catch {
