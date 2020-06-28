@@ -21,11 +21,6 @@ if (-not [boolean](Get-Module -Name Pester)) {
     Install-Module -Name Pester -Force -SkipPublisherCheck | Out-Null
 }
 
-$PipelinePesterParams = @{
-    OutputFile   = 'testResults.xml'
-    OutputFormat = 'NUnitXml'
-}
-
 $PS6PesterParams = @{
     ExcludeTag = 'PS5Only'
 }
@@ -49,7 +44,7 @@ else {
 }
 
 if (-not $Local) {
-    $PesterParams = $PesterParams + $PipelinePesterParams
+    $PesterParams.Add('CI',$true)
 }
 
 $PesterParams.Add('Output',$Output)
