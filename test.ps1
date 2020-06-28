@@ -21,6 +21,10 @@ if (-not [boolean](Get-Module -Name Pester)) {
     Install-Module -Name Pester -Force -SkipPublisherCheck | Out-Null
 }
 
+$Pester = Import-Module Pester -Force -PassThru
+
+Write-Host "Pester Version: $($Pester.Version)"
+
 if (-not $Local) {
     $Config = [PesterConfiguration]::Default.TestResult
 }
