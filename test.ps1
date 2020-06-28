@@ -25,13 +25,12 @@ $Pester = Import-Module Pester -Force -PassThru
 
 Write-Host "Pester Version: $($Pester.Version)"
 
+$Config = [PesterConfiguration]::Default
+$Config.Output.Verbosity = $Output
+$config.Run.PassThru = $true
+
 if (-not $Local) {
-    $Config = [PesterConfiguration]::Default.TestResult
-}
-else {
-    $Config = [PesterConfiguration]::Default
-    $Config.Output.Verbosity = $Output
-    $config.Run.PassThru = $true
+    $Config.TestResult.Enabled = $true
 }
 
 if ($PSEdition -eq 'Core' -and $IsLinux) {
