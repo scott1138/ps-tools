@@ -1,6 +1,6 @@
 function Get-Input {
 
-    [CmdletBinding(SupportsShouldProcess=$True)]
+    [CmdletBinding()]
 
     param (
         [Parameter(Mandatory=$True)]
@@ -35,38 +35,38 @@ function Get-Input {
             Write-InformationPlus 'The following question allows for multiple responses.'
             Write-InformationPlus 'Please separate those responses with a comma.'
         }
-        $Input = (Read-Host -Prompt "$Prompt [$Default]").Trim()
+        $UserInput = (Read-Host -Prompt "$Prompt [$Default]").Trim()
         
-        if (-not [string]::IsNullOrEmpty($Default) -and [string]::IsNullOrEmpty($Input)) {
+        if (-not [string]::IsNullOrEmpty($Default) -and [string]::IsNullOrEmpty($UserInput)) {
             return $Default
         }
         elseif ([boolean]$ValidResponses) {
             if ($MultipleChoice) {
-                # We are looking for responses in the $Input that are not in $ValidResponses
+                # We are looking for responses in the $UserInput that are not in $ValidResponses
                 # This would result in a '=>' side indicator.  If one is found the conditional is $false
-                $Input = $Input.Split(',')
-                if ((Compare-Object -ReferenceObject $ValidResponses -DifferenceObject $Input).SideIndicator -notcontains '=>') {
-                    return $Input
+                $UserInput = $UserInput.Split(',')
+                if ((Compare-Object -ReferenceObject $ValidResponses -DifferenceObject $UserInput).SideIndicator -notcontains '=>') {
+                    return $UserInput
                 }
                 else {
-                    Write-InformationPlus "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
+                    Write-InformationPlus "`n$UserInput was not a valid response, please try again.`n" -ForeGroundColor Yellow
                     Write-InformationPlus "Valid Choices: $($ValidResponses -join ',')`n" -ForeGroundColor Yellow    
                 }
             }
-            elseif ($Input -in $ValidResponses) {
-                return $Input
+            elseif ($UserInput -in $ValidResponses) {
+                return $UserInput
             }
             else {
-                Write-InformationPlus "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
+                Write-InformationPlus "`n$UserInput was not a valid response, please try again.`n" -ForeGroundColor Yellow
                 Write-InformationPlus "Valid Responses: $($ValidResponses -join ',')`n" -ForeGroundColor Yellow
             }
         }
         elseif (-not [string]::IsNullOrEmpty($Match)) {
-            if ($Input -match $Match) {
-                return $Input
+            if ($UserInput -match $Match) {
+                return $UserInput
             }
             else {
-                Write-InformationPlus "`n$Input was not a valid response, please try again.`n" -ForeGroundColor Yellow
+                Write-InformationPlus "`n$UserInput was not a valid response, please try again.`n" -ForeGroundColor Yellow
                 Write-InformationPlus "Valid input should match the pattern: $Match`n" -ForeGroundColor Yellow
                 if (-not [string]::IsNullOrEmpty($MatchHint)) {
                     Write-InformationPlus "$MatchHint`n" -ForeGroundColor Yellow
@@ -74,15 +74,15 @@ function Get-Input {
             }
         }
         elseif ($Required) {
-            if ([string]::IsNullOrEmpty($Input)) {
+            if ([string]::IsNullOrEmpty($UserInput)) {
                 Write-InformationPlus "`nThis field requires a value, please enter the required data.`n" -ForeGroundColor Yellow
             }
             else {
-                return $Input
+                return $UserInput
             }
         }
         else {
-            return $Input
+            return $UserInput
         }
         
     }
