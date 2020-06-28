@@ -18,7 +18,10 @@ PS-Tools is a collection of tools to simplify the administrative processes.
 * [Pending Improvements](#Pending-Improvements)
 
 ## Change Log
-* version 1.0.0 - 2020-06-24
+* v1.0.1 - 2020-?
+  * Fixes
+    * ?
+* v1.0.0 - 2020-06-24
   * Initial collection
   
 
