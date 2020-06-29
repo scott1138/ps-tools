@@ -51,7 +51,7 @@ Several of the cmdlets require other modules be preset as well, including, but n
 * [New-AADServicePrincipal](#New-AADServicePrincipal)
   * Creates an Azure AD service principal.  Can use generate either a password or certificate to be used for authentication.
   * Outputs the client id and the password or certificate as a PFX.
-* [New-ADUser](#New-ADUser)
+* [New-User](#New-User)
   * Create an AD user.  There are three parameter sets, RSA, NoRSA, or FromFile. RSA and NoRSA are for creating single users from the command line.
   * FromFile uses a CSV to provide data for multiple users at once.  When RSA is used an additional email is sent to the Security team to request an RSA token with the phone type.
   * With the AADSync switch, the user account will be created in the AAD synchronized OU and the user will be sent a single email explaining the AAD user registration process and a link to set the password.  A phone number is required with the AADSync option.
@@ -104,40 +104,40 @@ Certificate exported to C:\Temp\SP-App-Env.pfx
 ```
 ##### [Return to Commands](#Commands)
 
-### New-ADUser
+### New-User
 
 * For more details use:
 ```
-Get-Help New-ADUser
+Get-Help New-User
 ```
 
 * Syntax
 ```
-New-ADUser -FirstName <string> -LastName <string> -EmailAddress <string> -Description <string> [-Domain <string>] [-ADGroups <string[]>] [-AADGroups <string[]>] [-MobileNumber <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-User -FirstName <string> -LastName <string> -EmailAddress <string> -Description <string> [-Domain <string>] [-ADGroups <string[]>] [-AADGroups <string[]>] [-MobileNumber <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 
-New-ADUser -FirstName <string> -LastName <string> -EmailAddress <string> -Description <string> -RSA -PhoneType {Android | iPhone} [-Domain <string>] [-ADGroups <string[]>] [-AADGroups <string[]>] [-MobileNumber <string>] [-WhatIf] [-Confirm]  [<CommonParameters>]
+New-User -FirstName <string> -LastName <string> -EmailAddress <string> -Description <string> -RSA -PhoneType {Android | iPhone} [-Domain <string>] [-ADGroups <string[]>] [-AADGroups <string[]>] [-MobileNumber <string>] [-WhatIf] [-Confirm]  [<CommonParameters>]
 
-New-ADUser -UserFile <string> [-Domain <string>] [-WhatIf] [-Confirm]  [<CommonParameters>]
+New-User -UserFile <string> [-Domain <string>] [-WhatIf] [-Confirm]  [<CommonParameters>]
 ```
 
 * Create new user from command line (With RSA request)
 ```
-New-ADUser -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description' -PhoneType iPhone -RSA
+New-User -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description' -PhoneType iPhone -RSA
 ```
 
 * Create new user from command line (No RSA request)
 ```
-New-ADUser -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description'
+New-User -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description'
 ```
 
 * Create new user from command line (Specify groups, No RSA request)
 ```
-New-ADUser -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description' -ADGroups @('ADGroup1','ADGroup2') -AADGroups @('AADGroup1','AADGroup2')
+New-User -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description' -ADGroups @('ADGroup1','ADGroup2') -AADGroups @('AADGroup1','AADGroup2')
 ```
 
 * Create new user from command line (Copy groups from SourceUser)
 ```
-New-ADUser -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description' -SourceUser 'joe.hardy@example.com'
+New-User -FirstName 'Nancy' -LastName 'Drew' -EmailAddress 'nancy.drew@example.com' -Description 'Some Description' -SourceUser 'joe.hardy@example.com'
 ```
 
 * Create new users from a file
@@ -148,7 +148,7 @@ Joe,Hardy,Test User,joe.hardy@example.com,,,,,+1 555-444-1234
 Nancy,Drew,Test User,nancy.drew@example.com,,,,,+1 555-444-5678
 ...
 
-New-ADUser -FromFile <path>\users.csv
+New-User -FromFile <path>\users.csv
 ```
 
 * Create new users from a file (Specify Groups)
@@ -159,7 +159,7 @@ Joe,Hardy,Test User,joe.hardy@example.com,ADGroup1;ADGroup2,AADGroup1;AADGroup2,
 Nancy,Drew,Test User,nancy.drew@example.com,ADGroup1;ADGroup2,AADGroup3;AADGroup4,,,+1 555-444-5678
 ...
 
-New-ADUser -FromFile <path>\users.csv
+New-User -FromFile <path>\users.csv
 ```
 
 * Create new users from a file (With RSA)
@@ -170,7 +170,7 @@ Joe,Hardy,Test User,joe.hardy@example.com,,,true,iPhone,+1 555-444-1234
 Nancy,Drew,Test User,nancy.drew@example.com,,,true,Android,+1 555-444-5678
 ...
 
-New-ADUser -FromFile <path>\users.csv
+New-User -FromFile <path>\users.csv
 ```
 
 ##### [Return to Commands](#Commands)
