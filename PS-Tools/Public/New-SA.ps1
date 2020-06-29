@@ -66,7 +66,7 @@ function New-SA {
   }
 
   process {
-    function Set-AcctDetails {
+    function Initialize-AccountDetails {
       param (
         [string] $Env
       )
@@ -80,38 +80,38 @@ function New-SA {
 
       switch ($Env) {
         {'P','PRD' -contains $_} {
-          $Global:UserOU      = "OU=Production,$BaseOU"
-          $Global:AcctEnv     = "PRD"
-          $Global:SAGroup     = "Prod-ServiceAccounts"
+          $Script:UserOU      = "OU=Production,$BaseOU"
+          $Script:AcctEnv     = "PRD"
+          $Script:SAGroup     = "Prod-ServiceAccounts"
         }
         {'U','UAT' -contains $_} {
-          $Global:UserOU      = "OU=UAT,$BaseOU"
-          $Global:AcctEnv     = "UAT"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=UAT,$BaseOU"
+          $Script:AcctEnv     = "UAT"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'T','TRN' -contains $_} {
-          $Global:UserOU      = "OU=Training,$BaseOU"
-          $Global:AcctEnv     = "TRN"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=Training,$BaseOU"
+          $Script:AcctEnv     = "TRN"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'Q','TST' -contains $_} {
-          $Global:UserOU      = "OU=QA-Test,$BaseOU"
-          $Global:AcctEnv     = "TST"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=QA-Test,$BaseOU"
+          $Script:AcctEnv     = "TST"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'D','DEV' -contains $_} {
-          $Global:UserOU      = "OU=Development,$BaseOU"
-          $Global:AcctEnv     = "DEV"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=Development,$BaseOU"
+          $Script:AcctEnv     = "DEV"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'S','SBX' -contains $_} {
-          $Global:UserOU      = "OU=Sandbox,$BaseOU"
-          $Global:AcctEnv     = "SBX"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=Sandbox,$BaseOU"
+          $Script:AcctEnv     = "SBX"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
       } # End Switch
 
-    } # End Function Set-AcctDetails
+    } # End Function Initialize-AccountDetails
 
     if ($PSCmdlet.ParameterSetName -eq 'Prompt') {
       Clear-Host
@@ -123,7 +123,7 @@ function New-SA {
       Write-InformationPlus "Prod = P   UAT = U   Training = T   Test\QA = Q   Develoment = D   Sandbox = S"
       $EnvResponse = Get-Input -Prompt "What environment is this account for:" -ValidResponses @('P','U','T','Q','D','S')
     
-      Set-AcctDetails -Env $EnvResponse
+      Initialize-AccountDetails -Env $EnvResponse
 
       # IsSQL Account
       $SQLResponse = Get-Input -Prompt 'Is the a SQL Server service account?' -Default 'N' -ValidResponses @('Y','N')
@@ -171,13 +171,13 @@ function New-SA {
               }
           }
 
-          $UserName = "SA-$($Global:AcctEnv)SQL$Instance-$SQLType"
+          $UserName = "SA-$($Script:AcctEnv)SQL$Instance-$SQLType"
 
           $UserProperties = @{
             UserName = $UserName
             Description = $Description
-            UserOU = $Global:UserOU
-            SAGroup = $Global:SAGroup
+            UserOU = $Script:UserOU
+            SAGroup = $Script:SAGroup
             AzureSync = $AzureSync
           }
           $Accounts += New-Object PSObject -Property $UserProperties
@@ -211,8 +211,8 @@ function New-SA {
         $UserProperties = @{
           UserName = $UserName
           Description = $Description
-          UserOU = $Global:UserOU
-          SAGroup = $Global:SAGroup
+          UserOU = $Script:UserOU
+          SAGroup = $Script:SAGroup
           AzureSync = $AzureSync
         }
         $Accounts += New-Object PSObject -Property $UserProperties
@@ -221,13 +221,13 @@ function New-SA {
     } # End if Prompt - Handles Prompted Accounts
     else {
       # Handles Command Line Account
-      Set-AcctDetails -Env $Environment
+      Initialize-AccountDetails -Env $Environment
 
       $UserProperties = @{
         UserName = $UserName
         Description =$Description
-        UserOU = $Global:UserOU
-        SAGroup = $Global:SAGroup
+        UserOU = $Script:UserOU
+        SAGroup = $Script:SAGroup
         AzureSync = $AzureSync
       }
       $Accounts += New-Object PSObject -Property $UserProperties
@@ -272,10 +272,10 @@ function New-SA {
           }
         }
         # Wait for group membership confirmation
-        $Global:SAGroupObj = Get-ADGroup -Server $DomainController -Identity $Account.SAGroup -Properties @("primaryGroupToken")
+        $Script:SAGroupObj = Get-ADGroup -Server $DomainController -Identity $Account.SAGroup -Properties @("primaryGroupToken")
         # Get-ADUser doesn't have a -whatif parameter
         if ($PSCmdlet.ShouldProcess($Account.UserName, "Retrieve user and replace primary group token")) {
-          Get-ADUser -Server $DomainController -Identity $Account.UserName | Set-ADUser -Server $DomainController -Replace @{primaryGroupID=$Global:SAGroupObj.primaryGroupToken}
+          Get-ADUser -Server $DomainController -Identity $Account.UserName | Set-ADUser -Server $DomainController -Replace @{primaryGroupID=$Script:SAGroupObj.primaryGroupToken}
         }
         # Wait for the primary group to change
         if ($PSCmdlet.ShouldProcess($Account.UserName, "Remove account from Domain Users group")) {
