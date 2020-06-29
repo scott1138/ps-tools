@@ -19,8 +19,16 @@ PS-Tools is a collection of tools to simplify the administrative processes.
 
 ## Change Log
 * v1.0.1 - 2020-?
+  * New Cmdlets
+    * Write-InformationPlus
+      * Adds foreground\background color and nonewline options when calling Write-Information
   * Fixes
-    * ?
+    * Lots of internal changes to resolve PSScriptAnalyzer findings
+  * Breaking changes
+    * Renamed commands
+      * Login-AzureAD to Connect-AzureADTenant
+      * Handle-Error to Format-Error
+      * Refresh-Module to Update-CustomModule
 * v1.0.0 - 2020-06-24
   * Initial collection
   
