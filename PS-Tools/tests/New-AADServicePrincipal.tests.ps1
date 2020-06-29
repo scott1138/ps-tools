@@ -6,10 +6,11 @@ Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -Force -DisableNameChecking 4>$nu
 Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
     BeforeAll {
-        Function New-AzADApplication {}
-        Function New-AzADAppCredential {}
-        Function New-AzADServicePrincipal {}
-        Function New-AzADServicePrincipal {}
+        # Added ShouldProcess to avoid PSAnalyzer Errors
+        Function New-AzADApplication {[CmdletBinding(SupportsShouldProcess=$True)]param()}
+        Function New-AzADAppCredential {[CmdletBinding(SupportsShouldProcess=$True)]param()}
+        Function New-AzADServicePrincipal {[CmdletBinding(SupportsShouldProcess=$True)]param()}
+        Function New-AzADServicePrincipal {[CmdletBinding(SupportsShouldProcess=$True)]param()}
     }
 
     Context 'No Errors' {

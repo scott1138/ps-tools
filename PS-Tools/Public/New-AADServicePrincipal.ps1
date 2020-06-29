@@ -111,14 +111,14 @@ function New-AADServicePrincipal {
     }
 
     try {
-        $AADPassword = New-AzADAppCredential  @AADCredential
+        New-AzADAppCredential  @AADCredential | Out-Null
     }
     catch {
         Format-Error -e $_ -Message "Unable to create the AAD Application credential."
     }
 
     try {
-        $AADSPN = New-AzADServicePrincipal -ApplicationId $AADApp.ApplicationId
+        New-AzADServicePrincipal -ApplicationId $AADApp.ApplicationId | Out-Null
     }
     catch {
         Format-Error -e $_ -Message "Unable to create the AAD Service Principal."
