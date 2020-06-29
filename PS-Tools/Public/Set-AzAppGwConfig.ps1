@@ -1,6 +1,6 @@
 function Set-AzAppGWConfig {
     
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
 
     param (
         [Parameter(Mandatory=$true)]
@@ -119,7 +119,7 @@ function Set-AzAppGWConfig {
         Write-InformationPlus "Done!" -ForegroundColor Green
         
         # Set Subscription
-        Select-AzSubscription -SubscriptionName $SubName | Out-Null
+        Set-AzContext -SubscriptionName $SubName | Out-Null
 
         # Get App Gateway
         Write-InformationPlus "Getting Application Gateway $AppGWName..." -NoNewLine
@@ -491,8 +491,8 @@ function Set-AzAppGWConfig {
         Write-InformationPlus "`nChecking for active Application Gateway operations..." -NoNewLine
         $AllClear = $false
         Do {
-            $State = (Get-AzApplicationGateway -Name $AppGW.Name -ResourceGroupName $AppGW.ResourceGroupName).ProvisioningState
-            if ($State = 'Succeeded') {
+            $Script:State = (Get-AzApplicationGateway -Name $AppGW.Name -ResourceGroupName $AppGW.ResourceGroupName).ProvisioningState
+            if ($Script:State = 'Succeeded') {
                 $AllClear = $true
                 Write-InformationPlus "Done!" -ForegroundColor Green
             }

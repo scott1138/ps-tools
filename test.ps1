@@ -6,10 +6,7 @@ param (
     $Output = 'Normal',
 
     [switch]
-    $Local,
-
-    [switch]
-    $ForceBuild
+    $Local
 )
 
 $ErrorActionPreference = 'Stop'

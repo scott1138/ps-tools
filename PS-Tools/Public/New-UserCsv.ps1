@@ -1,5 +1,10 @@
 function New-UserCsv {
 
+    # Ignore EmptyCatchBlock PSScriptAnalyzer error
+    # The try\catch is in a loop and it is intended to prompt the user
+    # Until a satisfactory response is received.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock','')]
+    
     [CmdletBinding(SupportsShouldProcess=$True)]
 
     param (

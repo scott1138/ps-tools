@@ -1,6 +1,6 @@
 function Test-ModuleVersion {
 
-    [CmdletBinding(SupportsShouldProcess=$True)]
+    [CmdletBinding()]
 
     param (
     )

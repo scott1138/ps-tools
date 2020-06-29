@@ -4,14 +4,14 @@ Remove-Module PS-Tools -Force -ErrorAction SilentlyContinue -Verbose:$false
 Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -Force -DisableNameChecking 4>$null
 
 BeforeAll {
-    $UserCsvPath = "$env:TEMP\user.csv"
+    $Script:UserCsvPath = "$env:TEMP\user.csv"
 
     # Mock avoids actual attempts to login
     Function Connect-AzureADTenant {}
     Mock Connect-AzureADTenant { $true }
 
     # Mock needs to return $true because the result is used as a condition
-    Function New-ADUser {}
+    Function New-ADUser {} #[CmdletBinding(SupportsShouldProcess = $True)]param([object]$object)}
     Mock New-ADUser { $true }
 
     # Mock needs to return $true because the result is used as a condition
@@ -66,38 +66,38 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 PhoneType    = 'iPhone'
             }
 
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
-            New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
-            Remove-Item -Path $UserCsvPath -Force
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
+            New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+            Remove-Item -Path $Script:UserCsvPath -Force
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke Connect-AzureADTenant -Exactly 1 -Scope Context
             #Should -Invoke New-User -Exactly 1 -Scope Context
         }
 
-        It 'AD Groups are added' -TestCases $TestCases {
+        It 'AD Groups are added' -TestCases $Script:TestCases {
             # 4 groups are added, 3 base groups and 1 from the CSV
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 4
         }
 
-        It 'AAD groups are added' -TestCases $TestCases {
+        It 'AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 1
         }
 
-        It 'User email is sent' -TestCases $TestCases {
+        It 'User email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'HT_AAD_Account' } -Scope Context -Exactly 1
         }
 
-        It 'RSA email is sent' -TestCases $TestCases {
+        It 'RSA email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'RSA_Request' } -Scope Context -Exactly 1
         }
@@ -120,23 +120,23 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
 
             New-User -Domain 'example.com' @UserProperties -OutVariable TestOutput -InformationAction Ignore
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'AD Groups are added' -TestCases $TestCases {
+        It 'AD Groups are added' -TestCases $Script:TestCases {
             # 4 groups are added, 3 base groups and 1 from the parameter
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 4
         }
 
-        It 'AAD groups are added' -TestCases $TestCases {
+        It 'AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 1
         }
@@ -166,37 +166,37 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = 'true'
                 PhoneType    = 'iPhone'
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
-            New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
-            Remove-Item -Path $UserCsvPath -Force
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
+            New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+            Remove-Item -Path $Script:UserCsvPath -Force
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'No additional AD Groups are added' -TestCases $TestCases {
+        It 'No additional AD Groups are added' -TestCases $Script:TestCases {
             # There are 3 base groups
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 3
         }
 
-        It 'No AAD groups are added' -TestCases $TestCases {
+        It 'No AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 0
         }
 
-        It 'User email is sent' -TestCases $TestCases {
+        It 'User email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'HT_AAD_Account' } -Scope Context -Exactly 1
         }
 
-        It 'RSA email is sent' -TestCases $TestCases {
+        It 'RSA email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'RSA_Request' } -Scope Context -Exactly 1
         }
@@ -217,33 +217,33 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             }
             New-User @UserProperties -OutVariable TestOutput -InformationAction Ignore
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'No Additional AD Groups are added' -TestCases $TestCases {
+        It 'No Additional AD Groups are added' -TestCases $Script:TestCases {
             # There are 3 base groups
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 3
         }
 
-        It 'No AAD groups are added' -TestCases $TestCases {
+        It 'No AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 0
         }
 
-        It 'User email is sent' -TestCases $TestCases {
+        It 'User email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'HT_AAD_Account' } -Scope Context -Exactly 1
         }
 
-        It 'RSA email is sent' -TestCases $TestCases {
+        It 'RSA email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'RSA_Request' } -Scope Context -Exactly 1
         }
@@ -263,37 +263,37 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = $null
                 PhoneType    = $null
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
-            New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
-            Remove-Item -Path $UserCsvPath -Force
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
+            New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+            Remove-Item -Path $Script:UserCsvPath -Force
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'No additional AD Groups are added' -TestCases $TestCases {
+        It 'No additional AD Groups are added' -TestCases $Script:TestCases {
             # There are 3 base groups
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 3
         }
 
-        It 'No AAD groups are added' -TestCases $TestCases {
+        It 'No AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 0
         }
 
-        It 'User email is sent' -TestCases $TestCases {
+        It 'User email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'HT_AAD_Account' } -Scope Context -Exactly 1
         }
 
-        It 'RSA email is not sent' -TestCases $TestCases {
+        It 'RSA email is not sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'RSA_Request' } -Scope Context -Exactly 0
         }
@@ -312,33 +312,33 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             }
             New-User @UserProperties -OutVariable TestOutput -InformationAction Ignore
             
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'No Additional AD Groups are added' -TestCases $TestCases {
+        It 'No Additional AD Groups are added' -TestCases $Script:TestCases {
             # There are 3 base groups
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 3
         }
 
-        It 'No AAD groups are added' -TestCases $TestCases {
+        It 'No AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 0
         }
 
-        It 'User email is sent' -TestCases $TestCases {
+        It 'User email is sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'HT_AAD_Account' } -Scope Context -Exactly 1
         }
 
-        It 'RSA email is not sent' -TestCases $TestCases {
+        It 'RSA email is not sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke -CommandName Send-Email -ParameterFilter { $TemplateName -eq 'RSA_Request' } -Scope Context -Exactly 0
         }
@@ -365,33 +365,33 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
 
             New-User @UserProperties -OutVariable TestOutput -InformationAction Ignore
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'Retrives source user groups' -TestCases $TestCases {
+        It 'Retrives source user groups' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Get-ADGroup -Exactly 1 -Scope Context
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'AD Groups are added' -TestCases $TestCases {
+        It 'AD Groups are added' -TestCases $Script:TestCases {
             # 5 groups are added, 3 base groups and 2 source user groups
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 5
         }
 
-        It 'No AAD groups are added' -TestCases $TestCases {
+        It 'No AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 0
         }
 
-        It 'Emails are sent' -TestCases $TestCases {
+        It 'Emails are sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Send-Email -Scope Context -Exactly 2
         }
@@ -418,33 +418,33 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
 
             New-User @UserProperties -OutVariable TestOutput -InformationAction Ignore
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 TestOutput = $TestOutput
             }
         }
 
-        It 'Retrives source user groups' -TestCases $TestCases {
+        It 'Retrives source user groups' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Get-ADGroup -Scope Context
         }
 
-        It 'User is created' -TestCases $TestCases {
+        It 'User is created' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             #Should -Invoke New-User -Scope Context
         }
 
-        It 'AD Groups are added' -TestCases $TestCases {
+        It 'AD Groups are added' -TestCases $Script:TestCases {
             # 4 groups are added, 3 base groups and 1 source user group
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-ADGroupMember -Scope Context -Exactly 4
         }
 
-        It 'No AAD groups are added' -TestCases $TestCases {
+        It 'No AAD groups are added' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Add-AzADGroupMember -Scope Context -Exactly 0
         }
 
-        It 'Emails are sent' -TestCases $TestCases {
+        It 'Emails are sent' -TestCases $Script:TestCases {
             $TestOutput.Processed -eq $TestOutput.Created -and $TestOutput.Failed -eq 0 | Should -Be True
             Should -Invoke Send-Email -Scope Context -Exactly 2
         }
@@ -466,13 +466,13 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 PhoneType    = 'iPhone'
             }
 
-            $TestCases = @{
+            $Script:TestCases = @{
                 UserProperties = $UserProperties
             }
 
         }
 
-        It 'User creation fails' -TestCases $TestCases {
+        It 'User creation fails' -TestCases $Script:TestCases {
             Mock New-ADUser { throw 'Could not create user' }
             New-User @UserProperties -OutVariable TestOutput -InformationAction Ignore
             $TestOutput.Processed -eq $TestOutput.Failed -and $TestOutput.Created -eq 0 | Should -Be True
@@ -480,7 +480,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             #Should -Invoke New-User -Scope It
         }
 
-        It 'AD Group membership fails' -TestCases $TestCases {
+        It 'AD Group membership fails' -TestCases $Script:TestCases {
             Mock Add-ADGroupMember { throw 'Could not add user to group' }
             New-User @UserProperties -OutVariable TestOutput -InformationAction Ignore
             $TestOutput.Processed -eq $TestOutput.Failed -and $TestOutput.Created -eq 0 | Should -Be True
@@ -503,10 +503,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 AADGroups    = ''
                 RSA          = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -515,7 +515,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput | Should -Be 'PhoneType'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -531,10 +531,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -543,7 +543,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'FirstName'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -559,10 +559,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -571,7 +571,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'LastName'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -587,10 +587,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -599,7 +599,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'Description'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -615,10 +615,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -627,7 +627,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'Description'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -643,10 +643,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -655,7 +655,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'EmailAddress'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -671,10 +671,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -683,7 +683,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'EmailAddress'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -699,10 +699,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -711,7 +711,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'MobileNumber'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -727,10 +727,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = ''
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -739,7 +739,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'MobileNumber'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -755,10 +755,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = 't'
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -767,7 +767,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'RSA'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -783,10 +783,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = 'true'
                 PhoneType    = ''
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -795,7 +795,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'PhoneType'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 
@@ -811,10 +811,10 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
                 RSA          = 'true'
                 PhoneType    = 'Pixel'
             }
-            New-Object PSobject -Property $UserProperties | Export-Csv -Path $UserCsvPath -NoTypeInformation
+            New-Object PSobject -Property $UserProperties | Export-Csv -Path $Script:UserCsvPath -NoTypeInformation
 
             try {
-                New-User -Domain 'example.com' -UserFile $UserCsvPath -OutVariable TestOutput -InformationAction Ignore
+                New-User -Domain 'example.com' -UserFile $Script:UserCsvPath -OutVariable TestOutput -InformationAction Ignore
             } 
             catch {
                 $ErrorOccurred = $true
@@ -823,7 +823,7 @@ Describe 'New-User Tests' -Tag 'WindowsOnly' {
             $ErrorOccurred | Should -Be True
             $TestOutput.Issue | Should -Be 'PhoneType'
 
-            Remove-Item -Path $UserCsvPath -Force
+            Remove-Item -Path $Script:UserCsvPath -Force
 
         }
 

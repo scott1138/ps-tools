@@ -1,5 +1,5 @@
 function Get-CertificateExpiration {
-    
+
     [CmdletBinding(
         DefaultParameterSetName = 'Internal',
         SupportsShouldProcess = $True

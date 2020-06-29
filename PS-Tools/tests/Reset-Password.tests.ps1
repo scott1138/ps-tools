@@ -8,7 +8,7 @@ Describe 'Reset-Password Tests' {
     BeforeAll {
         # Define commands in case the module is not installed.
         Function Get-ADUser {}
-        Function Set-ADAccountPassword {}
+        Function Set-ADAccountPassword {[CmdletBinding(SupportsShouldProcess)]param()}
 
         Mock New-Password {'P@ssw0rd!!'} -ModuleName PS-Tools
 

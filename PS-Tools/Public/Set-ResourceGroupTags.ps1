@@ -1,5 +1,5 @@
 function Set-ResourceGroupTags {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
 
     param (
         [Parameter(Mandatory = $true)]
@@ -46,7 +46,7 @@ function Set-ResourceGroupTags {
 
         Write-InformationPlus "Processing subscription $($Subscription.Name) - ($SubNum of $SubCount)"
 
-        Select-AzSubscription $Subscription | Out-Null
+        Set-AzContext $Subscription | Out-Null
 
         $Context = Get-AzContext
 

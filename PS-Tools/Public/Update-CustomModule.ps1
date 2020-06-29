@@ -1,4 +1,4 @@
-function Refresh-Module {
+function Update-CustomModule {
 
     [CmdletBinding(SupportsShouldProcess=$True)]
 
@@ -50,7 +50,7 @@ function Refresh-Module {
 
         try {
             $ErrorActionPreference  = 'SilentlyContinue'
-            $Version = (Get-Module PS-Tools -ListAvailable | Sort Version -Descending | Select -First 1).Version
+            $Version = (Get-Module PS-Tools -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1).Version
             Write-InformationPlus "$ModuleName - currently at $Version"
             Write-InformationPlus "Updating..."
 

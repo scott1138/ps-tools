@@ -226,7 +226,7 @@ function New-User {
             # if a source user was provided, add any ADGroups that user is in to the user object.
             if ($PSBoundParameters.Keys -contains 'SourceUser') {
                 $SourceUserGroups = (Get-ADUser -filter { SamAccountName -eq $SourceUser -or UserPrincipalName -eq $SourceUser } -Properties MemberOf).MemberOf
-                $GroupNames = ($SourceUserGroups | Get-ADGroup -ErrorAction SilentlyContinue | Select -ExpandProperty Name)
+                $GroupNames = ($SourceUserGroups | Get-ADGroup -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
                 [array]$Users[0].ADGroups = $GroupNames
             }
         }
@@ -235,39 +235,39 @@ function New-User {
         # FirstName, LastName, Description, and MobileNumber CANNOT be empty for any user.
         # Any user with RSA set to true MUST provide a phone type.
         # When we add the LineNumber property we add 2 to the index to account for ordinal numbering and the csv header
-        $DataValidated = $true
+        $Script:DataValidated = $true
         $InvalidUsers = @()
         foreach ($User in $Users) {
             if ([string]::IsNullOrWhiteSpace($User.FirstName)) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'FirstName'
                 $InvalidUsers += $User
                 continue
             }
             elseif ([string]::IsNullOrWhiteSpace($User.LastName)) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'LastName'
                 $InvalidUsers += $User
                 continue
             }
             elseif ($User.FirstName.Length + $User.LastName.Length -gt 20) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'UserName over 20 characters'
                 $InvalidUsers += $User
                 continue
             }
             elseif ([string]::IsNullOrWhiteSpace($User.Description)) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'Description'
                 $InvalidUsers += $User
                 continue
             }
             elseif (-not (Test-EmailAddress -EmailAddress $User.EmailAddress)) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'EmailAddress'
                 $InvalidUsers += $User
@@ -276,21 +276,21 @@ function New-User {
             # Phone number RegEx ensures we get the +<country code> <number>.  The + and the space are mandatory!
             # The remainder matches a US number with dashes for or a number with no dashes
             elseif ([string]::IsNullOrWhiteSpace($User.MobileNumber) -or $User.MobileNumber -notmatch '^\+\d{1,2} \d{1,3}-?\d{1,3}-?\d{4,}$') {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'MobileNumber'
                 $InvalidUsers += $User
                 continue
             }
             if ($User.RSA -notin @('true', 'false', '')) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'RSA'
                 $InvalidUsers += $User
                 continue
             }
             if ($User.RSA -eq 'true' -and ([string]::IsNullOrWhiteSpace($User.PhoneType) -or $User.PhoneType -notin @('Android', 'iPhone'))) {
-                $DataValidated = $false
+                $Script:DataValidated = $false
                 $User | Add-Member -MemberType NoteProperty -Name 'LineNumber' -Value ($Users.IndexOf($User) + 2)
                 $User | Add-Member -MemberType NoteProperty -Name 'Issue' -Value 'PhoneType'
                 $InvalidUsers += $User
