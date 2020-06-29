@@ -45,17 +45,17 @@ function Reset-Password {
         $ADUser = Get-ADUser $Username -Properties mail,EmailAddress,proxyAddresses
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-        Handle-Error -e $_ -Message 'User not found in Active Directory.'
+        Format-Error -e $_ -Message 'User not found in Active Directory.'
     }
     catch {
-        Handle-Error -e $_ -Message 'Unknown error occurred validating user.'
+        Format-Error -e $_ -Message 'Unknown error occurred validating user.'
     }
     
     try {
         Set-ADAccountPassword -Identity $Username -NewPassword $SecurePW -Reset
     }
     catch {
-        Handle-Error -e $_ -Message 'Unable to reset the password.'
+        Format-Error -e $_ -Message 'Unable to reset the password.'
     }
 
     # User default email address if none is provided.
@@ -81,7 +81,7 @@ function Reset-Password {
                 Throw 'No email address was found in AD for this user, please use the -EmailAddress parameter.'
             }
             catch {
-                Handle-Error -e $_
+                Format-Error -e $_
             }
         }
     }

@@ -51,19 +51,19 @@ Function Add-DNSEntry {
       }
     }
     elseif ($Result.RecordData -ne $RecordData) {
-      Write-Host "A record exists for $Hostname but the record data does not match." -ForegroundColor Yellow
-      Write-Host "Current RecordData: $($Result.RecordData)"
-      Write-Host "Desired RecordData: $RecordData"
+      Write-InformationPlus "A record exists for $Hostname but the record data does not match." -ForegroundColor Yellow
+      Write-InformationPlus "Current RecordData: $($Result.RecordData)"
+      Write-InformationPlus "Desired RecordData: $RecordData"
       throw "Record exists, but data does not match!"
     }
     elseif ($Result.RecordData -eq $RecordData) {
-      Write-Host "A DNS record for $HostName already exists:"
-      Write-Host "RecordType: $($Result.RecordType)"
-      Write-Host "RecordData: $($Result.RecordData)"
+      Write-InformationPlus "A DNS record for $HostName already exists:"
+      Write-InformationPlus "RecordType: $($Result.RecordType)"
+      Write-InformationPlus "RecordData: $($Result.RecordData)"
     }
   }
   catch {
-    Handle-Error $_
+    Format-Error $_
   }
   
   <#

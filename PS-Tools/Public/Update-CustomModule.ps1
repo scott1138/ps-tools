@@ -1,4 +1,4 @@
-function Refresh-Module {
+function Update-CustomModule {
 
     [CmdletBinding(SupportsShouldProcess=$True)]
 
@@ -50,25 +50,25 @@ function Refresh-Module {
 
         try {
             $ErrorActionPreference  = 'SilentlyContinue'
-            $Version = (Get-Module PS-Tools -ListAvailable | Sort Version -Descending | Select -First 1).Version
-            Write-Host "$ModuleName - currently at $Version"
-            Write-Host "Updating..."
+            $Version = (Get-Module PS-Tools -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1).Version
+            Write-InformationPlus "$ModuleName - currently at $Version"
+            Write-InformationPlus "Updating..."
 
             Remove-Module $ModuleName -Force
             Update-Module $ModuleName -Force
             Import-Module $ModuleName -Force
 
             $Version = (Get-Module $ModuleName).Version.ToString()
-            Write-Host "$ModuleName - updated to $Version"
+            Write-InformationPlus "$ModuleName - updated to $Version"
 
             $ModuleRoot = Split-Path  -Path (Get-Module $ModuleName).ModuleBase -Parent
             $OldVersions = Get-ChildItem -Path $ModuleRoot -Exclude $Version
             $OldVersions | Remove-Item -Recurse -Force
-            Write-Host "Removed versions: $($OldVersions.Name -join ', ')"
+            Write-InformationPlus "Removed versions: $($OldVersions.Name -join ', ')"
         }
         catch {
-            Write-Host "Module Refresh Failed!" -ForegroundColor Yellow
-            Write-Host $_.Exception.Message -ForegroundColor Yellow
+            Write-InformationPlus "Module Refresh Failed!" -ForegroundColor Yellow
+            Write-InformationPlus $_.Exception.Message -ForegroundColor Yellow
         }
 
     }

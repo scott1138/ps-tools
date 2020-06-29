@@ -19,9 +19,9 @@ function New-AADServicePrincipal {
     }
 
     # Connect to Azure and select subscription
-    Write-Host "`nConnecting to Azure..." -NoNewLine
-    Login-AzureAD -AADTenant $AADTenant
-    Write-Host "Done!" -ForegroundColor Green
+    Write-InformationPlus "`nConnecting to Azure..." -NoNewLine
+    Connect-AzureADTenant -AADTenant $AADTenant
+    Write-InformationPlus "Done!" -ForegroundColor Green
 
     # Install compatibility module for core
     # This is alpha, not sure if it works
@@ -37,7 +37,7 @@ function New-AADServicePrincipal {
             Import-WinModule PKI
         }
         catch {
-            Handle-Error -e $_ -Message "Unable to install the WindowsCompatibility module. Resolve the issue and try again."
+            Format-Error -e $_ -Message "Unable to install the WindowsCompatibility module. Resolve the issue and try again."
         }
     }
     #>
@@ -52,7 +52,7 @@ function New-AADServicePrincipal {
         }
     }
     catch {
-        Handle-Error -e $_
+        Format-Error -e $_
     }
 
     $AADProperties = @{
@@ -64,7 +64,7 @@ function New-AADServicePrincipal {
         $AADApp = New-AzADApplication @AADProperties
     }
     catch {
-        Handle-Error -e $_ -Message "Unable to create new AAD Application."
+        Format-Error -e $_ -Message "Unable to create new AAD Application."
     }
 
     if ($CertAuth) {
@@ -72,7 +72,7 @@ function New-AADServicePrincipal {
             Get-ChildItem -Path Cert:\CurrentUser\My | Where-Object {$_.Subject -eq "CN=$Name"} | Remove-Item
         }
         catch {
-            Handle-Error -e $_ -Message "Unable to clean up local certificate."
+            Format-Error -e $_ -Message "Unable to clean up local certificate."
         }
 
         try {
@@ -87,7 +87,7 @@ function New-AADServicePrincipal {
             }
         }
         catch {
-            Handle-Error -e $_ -Message "Unable to generate a new certificate."
+            Format-Error -e $_ -Message "Unable to generate a new certificate."
         }
 
     }
@@ -106,22 +106,22 @@ function New-AADServicePrincipal {
             }
         }
         catch {
-            Handle-Error -e $_ -Message "Unable to generate a password."
+            Format-Error -e $_ -Message "Unable to generate a password."
         }
     }
 
     try {
-        $AADPassword = New-AzADAppCredential  @AADCredential
+        New-AzADAppCredential  @AADCredential | Out-Null
     }
     catch {
-        Handle-Error -e $_ -Message "Unable to create the AAD Application credential."
+        Format-Error -e $_ -Message "Unable to create the AAD Application credential."
     }
 
     try {
-        $AADSPN = New-AzADServicePrincipal -ApplicationId $AADApp.ApplicationId
+        New-AzADServicePrincipal -ApplicationId $AADApp.ApplicationId | Out-Null
     }
     catch {
-        Handle-Error -e $_ -Message "Unable to create the AAD Service Principal."
+        Format-Error -e $_ -Message "Unable to create the AAD Service Principal."
     }
 
     $Output = New-Object PSObject -Property @{'ClientId'=$AADApp.ApplicationId}
@@ -134,7 +134,7 @@ function New-AADServicePrincipal {
             $Output | Add-Member -MemberType NoteProperty -Name 'CertificatePath' -Value "C:\Temp\$Name.pfx"
         }
         catch{
-            Handle-Error -e $_ -Message "Unable to export certificate, it will need to be exported manually."
+            Format-Error -e $_ -Message "Unable to export certificate, it will need to be exported manually."
         }
     }
     else {

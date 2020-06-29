@@ -50,6 +50,7 @@ function Send-Email {
     $SmtpClient  = New-Object Net.Mail.SmtpClient($SmtpServer,$SmtpPort)
 
     $SmtpClient.Credentials = $ExchangeCredential
+    $SmtpClient.EnableSsl = $TLS
 
     $To  | Foreach-Object {$Email.To.Add($_)}
     if (-not [string]::IsNullOrEmpty($Cc)) { $Cc | Foreach-Object {$Email.Cc.Add($_)} }

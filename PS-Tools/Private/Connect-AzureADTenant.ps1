@@ -1,4 +1,4 @@
-function Login-AzureAD {
+function Connect-AzureADTenant {
 
   [CmdletBinding()]
 
@@ -21,11 +21,11 @@ function Login-AzureAD {
 
   if ($Login) {
     try {
-      $Response = Connect-AzAccount
+      Connect-AzAccount | Out-Null
       Write-Verbose "Successfully logged into $AADTenant AAD."
     }
     catch {
-      Handle-Error -e $_ -Message "Unable to connect to Azure AD."
+      Format-Error -e $_ -Message "Unable to connect to Azure AD."
     }
   }
 

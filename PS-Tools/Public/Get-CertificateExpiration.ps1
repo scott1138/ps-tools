@@ -1,5 +1,5 @@
 function Get-CertificateExpiration {
-    
+
     [CmdletBinding(
         DefaultParameterSetName = 'Internal',
         SupportsShouldProcess = $True
@@ -40,7 +40,7 @@ function Get-CertificateExpiration {
                 Where-Object {$_.HostName -ne '@' -and $_.RecordType -in @('A','CNAME')}
         }
         catch {
-            Handle-Error -e $_ -Message 'Failed to retrieve DNS records'
+            Format-Error -e $_ -Message 'Failed to retrieve DNS records'
         }
     }
 
@@ -49,7 +49,9 @@ function Get-CertificateExpiration {
     }
 
     # If TestRun switch is supplied, choose 20 random records
-    $Hosts = $Hosts | Get-Random -Count 5
+    if ($TestRun) {
+        $Hosts = $Hosts | Get-Random -Count 20
+    }
 
     # Thread safe variable to hold errors
     if ($LogErrors) {
@@ -161,6 +163,6 @@ function Get-CertificateExpiration {
         $LogPath = "$env:TEMP\cert_exp_error_log.csv"
         $Errors | Select-Object HostName, Message, ErrorCode, Source |
             Export-CSV -NoTypeInformation -Path $LogPath
-        Write-Host "Errors exported to $LogPath"
+        Write-InformationPlus "Errors exported to $LogPath"
     }
 }

@@ -28,7 +28,7 @@ function Get-EmailTemplate {
         $Templates = Get-ChildItem -Path "$PSScriptRoot\EmailTemplates" -Exclude "Images"
     }
     catch {
-        Handle-Error -e $_
+        Format-Error -e $_
     }
 
     foreach ($Template in $Templates) {
@@ -36,7 +36,7 @@ function Get-EmailTemplate {
         $Body   = Get-Content -path "$($Template.Fullname)\template.txt"
         $Tokens = (($Body | Select-String -AllMatches "#\w*#").Matches.Value) | Select-Object -Unique
 
-        New-Object -TypeName PSObject -Property @{Name=$Name;Body=$Body;Tokens=$Tokens} | Select Name, Tokens, Body
+        New-Object -TypeName PSObject -Property @{Name=$Name;Body=$Body;Tokens=$Tokens} | Select-Object Name, Tokens, Body
     }
 
 }

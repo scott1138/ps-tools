@@ -6,10 +6,11 @@ Import-Module "$PSScriptRoot\..\PS-Tools.psd1" -Force -DisableNameChecking 4>$nu
 Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
     BeforeAll {
-        Function New-AzADApplication {}
-        Function New-AzADAppCredential {}
-        Function New-AzADServicePrincipal {}
-        Function New-AzADServicePrincipal {}
+        # Added ShouldProcess to avoid PSAnalyzer Errors
+        Function New-AzADApplication {[CmdletBinding(SupportsShouldProcess=$True)]param()}
+        Function New-AzADAppCredential {[CmdletBinding(SupportsShouldProcess=$True)]param()}
+        Function New-AzADServicePrincipal {[CmdletBinding(SupportsShouldProcess=$True)]param()}
+        Function New-AzADServicePrincipal {[CmdletBinding(SupportsShouldProcess=$True)]param()}
     }
 
     Context 'No Errors' {
@@ -34,7 +35,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
             Mock New-AzADServicePrincipal { $true } -ModuleName PS-Tools
 
-            Mock Login-AzureAD { $true } -ModuleName PS-Tools
+            Mock Connect-AzureADTenant { $true } -ModuleName PS-Tools
 
             Mock Read-Host { ConvertTo-SecureString -String 'Password' -AsPlainText -Force } -ModuleName PS-Tools
 
@@ -42,7 +43,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
         It 'Generates the desired output when using password auth.' {
             
-            $Result = New-AADServicePrincipal -Name 'SP-Mock-AADApp' -AADTenant 'AADTenant'
+            $Result = New-AADServicePrincipal -Name 'SP-Mock-AADApp' -AADTenant 'AADTenant' -InformationAction SilentlyContinue
 
             $Result.ClientID | Should -BeOfType [GUID]
             $Result.Password.Length | Should -be 44
@@ -51,7 +52,7 @@ Describe 'New-AADServicePrincipal Tests' -Tag 'WindowsOnly' {
 
         It 'Generates the desired output when using certificate auth.' -Tag 'PS5Only' {
 
-            $Result = New-AADServicePrincipal -Name SP-Mock-AADApp -CertAuth -AADTenant AADTenant
+            $Result = New-AADServicePrincipal -Name SP-Mock-AADApp -CertAuth -AADTenant AADTenant -InformationAction SilentlyContinue
 
             $Result.ClientID | Should -BeOfType [GUID]
             $Result.CertThumbprint.Length | Should -Be 40

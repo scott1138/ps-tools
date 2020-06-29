@@ -1,5 +1,5 @@
 function Set-ResourceGroupTags {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
 
     param (
         [Parameter(Mandatory = $true)]
@@ -44,9 +44,9 @@ function Set-ResourceGroupTags {
         $SubNum = $Subscriptions.IndexOf($Subscription) + 1
         $SubCount = $Subscriptions.Count
 
-        Write-Host "Processing subscription $($Subscription.Name) - ($SubNum of $SubCount)"
+        Write-InformationPlus "Processing subscription $($Subscription.Name) - ($SubNum of $SubCount)"
 
-        Select-AzSubscription $Subscription | Out-Null
+        Set-AzContext $Subscription | Out-Null
 
         $Context = Get-AzContext
 
@@ -66,7 +66,7 @@ function Set-ResourceGroupTags {
             $Counter.Add($Resource)
             $Count = $Counter.Count
 
-            Write-Host "`rProcessed $Count out of $Using:TotalResources" -NoNewLine
+            Write-InformationPlus "`rProcessed $Count out of $Using:TotalResources" -NoNewLine
 
             # Reset variable
             $AzResourceGroup = $null
@@ -125,7 +125,7 @@ function Set-ResourceGroupTags {
             
         } # End Resource Loop
 
-        Write-Host "`n"
+        Write-InformationPlus "`n"
 
         $TimeStamp = Get-TimeStamp 
 

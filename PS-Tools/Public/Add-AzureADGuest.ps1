@@ -15,18 +15,18 @@ Function Add-AzureADGuest {
   $ErrorActionPreference = 'Stop'
 
   # Connect to Azure AD
-  Write-Host "Connecting to Azure AD..." -ForegroundColor Green
+  Write-Information "Connecting to Azure AD..." 
   try {
     $AADSession = Get-AzureADCurrentSessionInfo
-    Write-Host "Session already connected as $($AADSession.Account)" -ForegroundColor Green
+    Write-InformationPlus "Session already connected as $($AADSession.Account)" -ForegroundColor Green
   }
   catch {
     try {
       Connect-AzureAD -Credential (Get-Credential) | Out-Null
     }
     catch {
-      Write-Host "Failed to connect to Azure AD" -ForegroundColor Red
-      Write-Host $_.Exception.Message -ForegroundColor Yellow
+      Write-InformationPlus "Failed to connect to Azure AD" -ForegroundColor Red
+      Write-InformationPlus $_.Exception.Message -ForegroundColor Yellow
     }
   } 
     

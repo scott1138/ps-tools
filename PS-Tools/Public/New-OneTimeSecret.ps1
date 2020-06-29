@@ -35,7 +35,7 @@ function New-OneTimeSecret {
         return "https://onetimesecret.com/secret/$SecretKey"
     }
     catch {
-        Handle-Error -e $_ -Message "Unable to reach OneTimeSecret"
+        Format-Error -e $_ -Message "Unable to reach OneTimeSecret"
     }
 
 }

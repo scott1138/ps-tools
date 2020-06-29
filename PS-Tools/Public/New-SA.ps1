@@ -56,7 +56,7 @@ function New-SA {
       Write-Verbose "Using domain controller $DomainController"
     }
     catch {
-      Handle-Error -e $_
+      Format-Error -e $_
     }
 
 
@@ -66,7 +66,7 @@ function New-SA {
   }
 
   process {
-    function Set-AcctDetails {
+    function Initialize-AccountDetails {
       param (
         [string] $Env
       )
@@ -80,38 +80,38 @@ function New-SA {
 
       switch ($Env) {
         {'P','PRD' -contains $_} {
-          $Global:UserOU      = "OU=Production,$BaseOU"
-          $Global:AcctEnv     = "PRD"
-          $Global:SAGroup     = "Prod-ServiceAccounts"
+          $Script:UserOU      = "OU=Production,$BaseOU"
+          $Script:AcctEnv     = "PRD"
+          $Script:SAGroup     = "Prod-ServiceAccounts"
         }
         {'U','UAT' -contains $_} {
-          $Global:UserOU      = "OU=UAT,$BaseOU"
-          $Global:AcctEnv     = "UAT"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=UAT,$BaseOU"
+          $Script:AcctEnv     = "UAT"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'T','TRN' -contains $_} {
-          $Global:UserOU      = "OU=Training,$BaseOU"
-          $Global:AcctEnv     = "TRN"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=Training,$BaseOU"
+          $Script:AcctEnv     = "TRN"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'Q','TST' -contains $_} {
-          $Global:UserOU      = "OU=QA-Test,$BaseOU"
-          $Global:AcctEnv     = "TST"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=QA-Test,$BaseOU"
+          $Script:AcctEnv     = "TST"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'D','DEV' -contains $_} {
-          $Global:UserOU      = "OU=Development,$BaseOU"
-          $Global:AcctEnv     = "DEV"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=Development,$BaseOU"
+          $Script:AcctEnv     = "DEV"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
         {'S','SBX' -contains $_} {
-          $Global:UserOU      = "OU=Sandbox,$BaseOU"
-          $Global:AcctEnv     = "SBX"
-          $Global:SAGroup     = "NonProd-ServiceAccounts"
+          $Script:UserOU      = "OU=Sandbox,$BaseOU"
+          $Script:AcctEnv     = "SBX"
+          $Script:SAGroup     = "NonProd-ServiceAccounts"
         }
       } # End Switch
 
-    } # End Function Set-AcctDetails
+    } # End Function Initialize-AccountDetails
 
     if ($PSCmdlet.ParameterSetName -eq 'Prompt') {
       Clear-Host
@@ -120,10 +120,10 @@ function New-SA {
       Clear-Variable Description,UserOU,AcctEnv,SAGroup -ErrorAction SilentlyContinue
 
       # Select SA Environment
-      Write-Host "Prod = P   UAT = U   Training = T   Test\QA = Q   Develoment = D   Sandbox = S"
+      Write-InformationPlus "Prod = P   UAT = U   Training = T   Test\QA = Q   Develoment = D   Sandbox = S"
       $EnvResponse = Get-Input -Prompt "What environment is this account for:" -ValidResponses @('P','U','T','Q','D','S')
     
-      Set-AcctDetails -Env $EnvResponse
+      Initialize-AccountDetails -Env $EnvResponse
 
       # IsSQL Account
       $SQLResponse = Get-Input -Prompt 'Is the a SQL Server service account?' -Default 'N' -ValidResponses @('Y','N')
@@ -134,15 +134,15 @@ function New-SA {
         # Convert instance to an int and format as a two character string
         $Instance = "{0:D2}" -f [int]$Instance
 
-        Write-Host "`nChoose one or more of the following SQL account types:"
-        Write-Host "A - SQL Server Database Engine"
-        Write-Host "B - SQL Server Agent"
-        Write-Host "C - SQL Server Reporting Services"
-        Write-Host "D - SQL Server Analysis Services"
-        Write-Host "E - SQL Server Integration Services`n"
+        Write-InformationPlus "`nChoose one or more of the following SQL account types:"
+        Write-InformationPlus "A - SQL Server Database Engine"
+        Write-InformationPlus "B - SQL Server Agent"
+        Write-InformationPlus "C - SQL Server Reporting Services"
+        Write-InformationPlus "D - SQL Server Analysis Services"
+        Write-InformationPlus "E - SQL Server Integration Services`n"
         $SQLAcctTypes = Get-Input -Prompt 'Choose one or more of the SQL account types' -ValidResponses ('A','B','C','D','E') -MultipleChoice
 
-        Write-Host "`n`n"
+        Write-InformationPlus "`n`n"
         $CSResponse = Get-Input -Prompt "Will the account(s) be synchronized with Azure"  -ValidResponses ('true','false') -Default 'false'
 
         $AzureSync = [System.Convert]::ToBoolean($CSResponse)
@@ -171,13 +171,13 @@ function New-SA {
               }
           }
 
-          $UserName = "SA-$($Global:AcctEnv)SQL$Instance-$SQLType"
+          $UserName = "SA-$($Script:AcctEnv)SQL$Instance-$SQLType"
 
           $UserProperties = @{
             UserName = $UserName
             Description = $Description
-            UserOU = $Global:UserOU
-            SAGroup = $Global:SAGroup
+            UserOU = $Script:UserOU
+            SAGroup = $Script:SAGroup
             AzureSync = $AzureSync
           }
           $Accounts += New-Object PSObject -Property $UserProperties
@@ -185,25 +185,25 @@ function New-SA {
 
       } # End SQL Section
       else {
-        Write-Host "Please use the Service Account Naming Standard:"
-        Write-Host "SA-<ENV><APP>-<PURPOSE>`n"
-        Write-Host "Examples:"
-        Write-Host "SA-DEVAPP-WFEAppPool"
-        Write-Host "SA-PRDAPP-Monitoring`n"
-        Write-Host "The <PURPOSE> should be relatable and between 2-10 characters"
-        Write-Host "You may not exceed 20 total characters`n"
+        Write-InformationPlus "Please use the Service Account Naming Standard:"
+        Write-InformationPlus "SA-<ENV><APP>-<PURPOSE>`n"
+        Write-InformationPlus "Examples:"
+        Write-InformationPlus "SA-DEVAPP-WFEAppPool"
+        Write-InformationPlus "SA-PRDAPP-Monitoring`n"
+        Write-InformationPlus "The <PURPOSE> should be relatable and between 2-10 characters"
+        Write-InformationPlus "You may not exceed 20 total characters`n"
         $UserName = Get-Input -Prompt "Enter a username for the service account" -Match "^SA-(SBX|DEV|TST|TRN|UAT|PRD)([A-Z]{3})-\w{2,10}$" -MatchHint "Examples: SA-DEVAPP-AppPool, SA-PRDAPP-AzDevOps"
 
-        Write-Host "`n`n"
-        Write-Host "A description is required for all service acoounts."
-        Write-Host "Please use the following format:"
-        Write-Host "<ServerName(s)> - <Use Type> - <Actions performed>`n"
-        Write-Host "Examples:"
-        Write-Host "ServerName - Scheduled Task - Runs FTP job"
-        Write-Host "ServerName - IIS App Pool - Runs the example.com site"
+        Write-InformationPlus "`n`n"
+        Write-InformationPlus "A description is required for all service acoounts."
+        Write-InformationPlus "Please use the following format:"
+        Write-InformationPlus "<ServerName(s)> - <Use Type> - <Actions performed>`n"
+        Write-InformationPlus "Examples:"
+        Write-InformationPlus "ServerName - Scheduled Task - Runs FTP job"
+        Write-InformationPlus "ServerName - IIS App Pool - Runs the example.com site"
         $Description = Get-Input -Prompt "Enter a description for the account" -Required
 
-        Write-Host "`n`n"
+        Write-InformationPlus "`n`n"
         $CSResponse = Get-Input -Prompt "Will this account be synchronized with Azure"  -ValidResponses ('true','false') -Default 'false'
 
         $AzureSync = [System.Convert]::ToBoolean($CSResponse)
@@ -211,8 +211,8 @@ function New-SA {
         $UserProperties = @{
           UserName = $UserName
           Description = $Description
-          UserOU = $Global:UserOU
-          SAGroup = $Global:SAGroup
+          UserOU = $Script:UserOU
+          SAGroup = $Script:SAGroup
           AzureSync = $AzureSync
         }
         $Accounts += New-Object PSObject -Property $UserProperties
@@ -221,20 +221,20 @@ function New-SA {
     } # End if Prompt - Handles Prompted Accounts
     else {
       # Handles Command Line Account
-      Set-AcctDetails -Env $Environment
+      Initialize-AccountDetails -Env $Environment
 
       $UserProperties = @{
         UserName = $UserName
         Description =$Description
-        UserOU = $Global:UserOU
-        SAGroup = $Global:SAGroup
+        UserOU = $Script:UserOU
+        SAGroup = $Script:SAGroup
         AzureSync = $AzureSync
       }
       $Accounts += New-Object PSObject -Property $UserProperties
     } # End Else - Handles Command Line Account
 
     # Data validation
-    Write-Host "`nThe following account will be created:"
+    Write-InformationPlus "`nThe following account will be created:"
     Write-Output ($Accounts | Format-Table UserName, Description, AzureSync -AutoSize)
 
     $null = Get-Input -Prompt 'Enter YES to continue or press Ctrl-C to exit' -ValidResponses 'Yes'
@@ -272,25 +272,25 @@ function New-SA {
           }
         }
         # Wait for group membership confirmation
-        $Global:SAGroupObj = Get-ADGroup -Server $DomainController -Identity $Account.SAGroup -Properties @("primaryGroupToken")
+        $Script:SAGroupObj = Get-ADGroup -Server $DomainController -Identity $Account.SAGroup -Properties @("primaryGroupToken")
         # Get-ADUser doesn't have a -whatif parameter
         if ($PSCmdlet.ShouldProcess($Account.UserName, "Retrieve user and replace primary group token")) {
-          Get-ADUser -Server $DomainController -Identity $Account.UserName | Set-ADUser -Server $DomainController -Replace @{primaryGroupID=$Global:SAGroupObj.primaryGroupToken}
+          Get-ADUser -Server $DomainController -Identity $Account.UserName | Set-ADUser -Server $DomainController -Replace @{primaryGroupID=$Script:SAGroupObj.primaryGroupToken}
         }
         # Wait for the primary group to change
         if ($PSCmdlet.ShouldProcess($Account.UserName, "Remove account from Domain Users group")) {
           Remove-ADGroupMember -Server $DomainController -Identity 'Domain Users' -Members $Account.UserName -Confirm:$false
         }
         # Output results
-        Write-Host "Service Account $UserName created, the password is $Password"
+        Write-InformationPlus "Service Account $UserName created, the password is $Password"
         if ($Account.AzureSync) {
-          Write-Host "IMPORTANT REQUIREMENT FOR AZURE SYNCED ACCOUNTS:"
-          Write-Host "1. You must login as the account once to finish the Okta setup.  Please record the security question in the Secret Server notes."
-          Write-Host "2. The NoMFA option only works on the internal network.  Connections coming from the internet (Azure) will need special consideration."
+          Write-InformationPlus "IMPORTANT REQUIREMENT FOR AZURE SYNCED ACCOUNTS:"
+          Write-InformationPlus "1. You must login as the account once to finish the Okta setup.  Please record the security question in the Secret Server notes."
+          Write-InformationPlus "2. The NoMFA option only works on the internal network.  Connections coming from the internet (Azure) will need special consideration."
         }
       }
       catch {
-        Handle-Error -e $_ -Message "Failed to create user $($Account.UserName), aborting process!"
+        Format-Error -e $_ -Message "Failed to create user $($Account.UserName), aborting process!"
       }
     } # End Account Creation - foreach Account
         

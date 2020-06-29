@@ -17,7 +17,7 @@ if ((Get-PackageProvider NuGet -ErrorAction SilentlyContinue).version -lt '2.8.5
     Install-PackageProvider NuGet -Force
 }
 
-$PowerShellGetVersion = ((Get-Module PowerShellGet -ListAvailable).Version | Sort -Descending | Select -First 1)
+$PowerShellGetVersion = ((Get-Module PowerShellGet -ListAvailable).Version | Sort-Object -Descending | Select-Object -First 1)
 if ($PowerShellGetVersion -lt '2.2.1') {
     Install-Module PowerShellGet -Force -AllowClobber
     Remove-Module PowerShellGet -Force

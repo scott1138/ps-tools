@@ -1,6 +1,6 @@
 function New-Password {
 
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
 
     param (
         [ValidateRange(8,20)]
@@ -18,7 +18,7 @@ function New-Password {
     $letters = 65..90 + 97..122
 
     do {
-        $Password = (Get-Random -Count $PasswordLength -InputObject ($punc + $digits + $letters) | % {[char]$_}) -join ''
+        $Password = (Get-Random -Count $PasswordLength -InputObject ($punc + $digits + $letters) | ForEach-Object {[char]$_}) -join ''
     }
     until ($Password -match "[0-9][A-z][!#$%&()*-.?@]{$MinSpecialChars}")
 
