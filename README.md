@@ -18,7 +18,7 @@ PS-Tools is a collection of tools to simplify the administrative processes.
 * [Pending Improvements](#Pending-Improvements)
 
 ## Change Log
-* v1.0.1 - 2020-?
+* v1.0.1 - 2020-6-29
   * New Cmdlets
     * Write-InformationPlus
       * Adds foreground\background color and nonewline options when calling Write-Information
