@@ -18,6 +18,15 @@ PS-Tools is a collection of tools to simplify the administrative processes.
 * [Pending Improvements](#Pending-Improvements)
 
 ## Change Log
+* v1.1.0 - 2020-7-?
+  * New Cmdlets
+    * Set-PSToolsConfig
+      * Created JSON config file to hold values required for other cmdlets.  Solves issue around editing cmdlets for each environments
+    * Test-PSToolsConfig (Internal)
+      * Used internally to validate the required settings exist for a specific cmdlet.
+  * Updated Cmdlets
+    * New-SA
+      * Adapted for PSToolsConfig values
 * v1.0.1 - 2020-6-29
   * New Cmdlets
     * Write-InformationPlus
