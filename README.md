@@ -18,7 +18,7 @@ PS-Tools is a collection of tools to simplify the administrative processes.
 * [Pending Improvements](#Pending-Improvements)
 
 ## Change Log
-* v1.1.0 - 2020-7-?
+* v1.1.0 - 2020-7-13
   * New Cmdlets
     * Set-PSToolsConfig
       * Created JSON config file to hold values required for other cmdlets.  Solves issue around editing cmdlets for each environments
@@ -27,6 +27,8 @@ PS-Tools is a collection of tools to simplify the administrative processes.
   * Updated Cmdlets
     * New-SA
       * Adapted for PSToolsConfig values
+    * Set-AzAppGwConfig
+      * Added TrustedCA switch to support Application Gateway v2 and the ability to use a Trusted CA instead of an uploaded certificate.
 * v1.0.1 - 2020-6-29
   * New Cmdlets
     * Write-InformationPlus

@@ -24,7 +24,8 @@ Write-InformationPlus "Pester Version: $($Pester.Version)`n"
 
 $Config = [PesterConfiguration]::Default
 $Config.Output.Verbosity = $Output
-$config.Run.PassThru = $true
+$Config.Run.PassThru = $true
+$Config.Run.Path = "$PSScriptRoot\PS-Tools\tests"
 
 if (-not $Local) {
     $Config.TestResult.Enabled = $true
