@@ -16,9 +16,16 @@ foreach ($Function in $Functions) {
     }
 }
 
+try {
+    $PSToolsConfig = Get-Content -Path 'C:\ProgramData\PS-Tools\config.json' -ErrorAction 'Stop' | ConvertFrom-Json
+    Write-Verbose "Configuration loaded from C:\ProgramDate\PS-Tools\config.json"
+}
+catch {
+    Write-Warning "PS-Tools configuration file not found."
+    Write-Warning "Run Set-PSToolsConfig to create one."
+}
 
 # Export only the functions using PowerShell standard verb-noun naming.
 # Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
 # This improves performance of command discovery in PowerShell.
-Export-ModuleMember -Function *-*
-
+Export-ModuleMember -Function $Functions.BaseName -Variable 'PSToolsConfig'

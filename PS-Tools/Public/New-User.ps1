@@ -117,6 +117,19 @@ function New-User {
             $InformationPreference = 'Ignore'
         }
 
+        # Set the domain controller
+        try {
+            # The [0] gets the first DC returned and makes it a string vs an AD object
+            $DomainController = (Get-ADDomainController -Service PrimaryDC -Discover).HostName[0]
+            if ([string]::IsNullOrEmpty($DomainController)) {
+                throw 'No Domain Controller found!!'
+            }
+            Write-Verbose "Using domain controller $DomainController"
+        }
+        catch {
+            Format-Error -e $_
+        }
+
         Write-Debug $PSCmdlet.ParameterSetName
     }
 
@@ -366,6 +379,7 @@ function New-User {
                 Path                  = 'ou=Users,dc=domain,dc=com'
                 Enabled               = $true
                 ChangePasswordAtLogon = $true
+                Server                = $DomainController
             }
             [array]$User.ADGroups += 'MFA', 'AADP2', 'SSPR'
 

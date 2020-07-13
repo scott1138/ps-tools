@@ -10,6 +10,10 @@ BeforeAll {
     Function Connect-AzureADTenant {}
     Mock Connect-AzureADTenant { $true }
 
+    # Mock needs to return an array like the real command would
+    Function Get-ADDomainController {}
+    Mock Get-ADDomainController { New-Object -TypeName psobject -Property @{Hostname = @('some-dc.domain.local')} }
+
     # Mock needs to return $true because the result is used as a condition
     Function New-ADUser {} #[CmdletBinding(SupportsShouldProcess = $True)]param([object]$object)}
     Mock New-ADUser { $true }
