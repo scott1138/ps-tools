@@ -53,6 +53,10 @@ function Set-AzAppGWConfig {
 
         [string]$AuthCertPath,
 
+        # This is used with the AppGw v2 and does not require a specific
+        # Cert for backend pool verification when using E2E TLS
+        [switch]$TrustedCA,
+
         [string]$HttpListenerPort = "80",
 
         [string]$HttpsListenerPort = "443"
@@ -69,8 +73,6 @@ function Set-AzAppGWConfig {
     }
 
     process {
-
-        Write-InformationPlus ''
 
         # Capitalize the first letter of the environment
         # This is for Az Dev Ops pipelines where the env_name var has to be lower case
@@ -221,26 +223,31 @@ function Set-AzAppGWConfig {
                 Format-Error -e $_ -Message 'Failed to process the SSL certificate'
             }
             try {
-                Write-InformationPlus "Processing Auth Certificate..." -NoNewLine
-                $AuthCert = Get-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -ApplicationGateway $AppGW -ErrorAction SilentlyContinue
-                if ($null -eq $AuthCert -and [boolean]$AuthCertPath) {
-                    Write-InformationPlus "`n  Adding Auth Certificate..." -NoNewLine
-                    Add-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -CertificateFile $AuthCertPath -ApplicationGateway $AppGW | Out-Null
-                    $AuthCert = Get-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -ApplicationGateway $AppGW
-                    Write-InformationPlus "Done!" -ForegroundColor Green
-                }
-                elseif ([boolean]$AuthCert -and [boolean]$AuthCertPath) {
-                    Write-InformationPlus "`n  Updating Auth Certificate..." -NoNewLine
-                    Set-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -CertificateFile $AuthCertPath -ApplicationGateway $AppGW | Out-Null
-                    $AuthCert = Get-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -ApplicationGateway $AppGW
-                    Write-InformationPlus "Done!" -ForegroundColor Green
-                }
-                elseif ($null -eq $AuthCert -and -not [boolean]$AuthCertPath) {
-                    Write-InformationPlus "Error!" -ForegroundColor Red
-                    throw "No Auth Certificate found and no path provided!"
+                if (-not $TrustedCA) {
+                    Write-InformationPlus "Processing Auth Certificate..." -NoNewLine
+                    $AuthCert = Get-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -ApplicationGateway $AppGW -ErrorAction SilentlyContinue
+                    if ($null -eq $AuthCert -and [boolean]$AuthCertPath) {
+                        Write-InformationPlus "`n  Adding Auth Certificate..." -NoNewLine
+                        Add-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -CertificateFile $AuthCertPath -ApplicationGateway $AppGW | Out-Null
+                        $AuthCert = Get-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -ApplicationGateway $AppGW
+                        Write-InformationPlus "Done!" -ForegroundColor Green
+                    }
+                    elseif ([boolean]$AuthCert -and [boolean]$AuthCertPath) {
+                        Write-InformationPlus "`n  Updating Auth Certificate..." -NoNewLine
+                        Set-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -CertificateFile $AuthCertPath -ApplicationGateway $AppGW | Out-Null
+                        $AuthCert = Get-AzApplicationGatewayAuthenticationCertificate -Name $AuthCertName -ApplicationGateway $AppGW
+                        Write-InformationPlus "Done!" -ForegroundColor Green
+                    }
+                    elseif ($null -eq $AuthCert -and -not [boolean]$AuthCertPath) {
+                        Write-InformationPlus "Error!" -ForegroundColor Red
+                        throw "No Auth Certificate found and no path provided!"
+                    }
+                    else {
+                        Write-InformationPlus "Done!" -ForegroundColor Green
+                    }
                 }
                 else {
-                    Write-InformationPlus "Done!" -ForegroundColor Green
+                    Write-InformationPlus "Using Trusted Certificate Authority."
                 }
             }
             catch {
@@ -356,16 +363,29 @@ function Set-AzAppGWConfig {
                 }
             }
             if ($HTTPS) {
+                $BEHttpProperties = @{
+                    Name = $BEHttpsCfgName
+                    Protocol = 'Https'
+                    Port = $BEHttpsCfgPort
+                    CookieBasedAffinity = $CookieBasedAffinity
+                    AffinityCookieName = $AffinityCookieName
+                    RequestTimeout = 240
+                    Probe = $HttpsProbe
+                    ApplicationGateway = $AppGW
+                }
+                if (-not $TrustedCA) {
+                    AuthenticationCertificates = $AuthCert
+                }
                 $BEHttpsCfg = Get-AzApplicationGatewayBackendHttpSetting -Name $BEHttpsCfgName -ApplicationGateway $AppGW -ErrorAction SilentlyContinue
                 if ($null -eq $BEHttpsCfg) {
                     Write-InformationPlus "`n  Adding HTTPS Config ..." -NoNewLine
-                    Add-AzApplicationGatewayBackendHttpSetting -Name $BEHttpsCfgName -Protocol Https -Port $BEHttpsCfgPort -CookieBasedAffinity $CookieBasedAffinity -AffinityCookieName $AffinityCookieName -RequestTimeout 240  -AuthenticationCertificates $AuthCert -Probe $HttpsProbe -ApplicationGateway $AppGW | Out-Null
+                    Add-AzApplicationGatewayBackendHttpSetting @BEHttpProperties | Out-Null
                     $BEHttpsCfg = Get-AzApplicationGatewayBackendHttpSetting -Name $BEHttpsCfgName -ApplicationGateway $AppGW
                     Write-InformationPlus "Done!" -ForegroundColor Green
                 }
                 else {
                     Write-InformationPlus "`n  Updating HTTPS Config ..." -NoNewLine
-                    Set-AzApplicationGatewayBackendHttpSetting -Name $BEHttpsCfgName -Protocol Https -Port $BEHttpsCfgPort -CookieBasedAffinity $CookieBasedAffinity -AffinityCookieName $AffinityCookieName -RequestTimeout 240  -AuthenticationCertificates $AuthCert -Probe $HttpsProbe -ApplicationGateway $AppGW | Out-Null
+                    Set-AzApplicationGatewayBackendHttpSetting @BEHttpProperties | Out-Null
                     $BEHttpsCfg = Get-AzApplicationGatewayBackendHttpSetting -Name $BEHttpsCfgName -ApplicationGateway $AppGW
                     Write-InformationPlus "Done!" -ForegroundColor Green
                 }
