@@ -18,6 +18,13 @@ PS-Tools is a collection of tools to simplify the administrative processes.
 * [Pending Improvements](#Pending-Improvements)
 
 ## Change Log
+* v1.2.0 - 2020-7-17
+  * New Cmdlets
+    * Set-PSToolsConfig
+      * Remove-AzAppGwConfig
+        * Can remove multiple configuration items during a single transaction.
+        * Currently text based can can remove routing rules, redirect configurations, http settings, probes, and listeners.
+        * Has a confirmation and support -whatif but be VERY careful!
 * v1.1.0 - 2020-7-13
   * New Cmdlets
     * Set-PSToolsConfig
