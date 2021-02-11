@@ -122,7 +122,7 @@ function Get-AzureNSGData {
                             Action          = $Action
                             Rule            = $Rule
                         }
-                    ) > null
+                    ) > $null
                 }
                 
             }
